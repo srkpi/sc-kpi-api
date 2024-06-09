@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "yarn prisma migrate deploy && nest build",
+    "build": "sleep 3 && yarn prisma migrate deploy && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "sleep 3 && nest start",
     "start:dev": "nest start --watch",
