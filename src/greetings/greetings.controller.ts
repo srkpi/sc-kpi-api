@@ -1,12 +1,20 @@
-import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { GreetingsService } from './greetings.service';
-import {CreateGreetingDto} from "./dto/create-greeting.dto";
-import {plainToInstance} from "class-transformer";
-import {GreetingResponseCreationDto} from "./dto/greeting-response-creation.dto";
-import {GreetingIdDto} from "./dto/greeting-id.dto";
-import {GreetingResponseInfoDto} from "./dto/greeting-response-info.dto";
-import {UpdateGreetingDto} from "./dto/update-greeting.dto";
-import {MessageResponseDto} from "./dto/message-response.dto";
+import { CreateGreetingDto } from './dto/create-greeting.dto';
+import { plainToInstance } from 'class-transformer';
+import { GreetingResponseCreationDto } from './dto/greeting-response-creation.dto';
+import { GreetingIdDto } from './dto/greeting-id.dto';
+import { GreetingResponseInfoDto } from './dto/greeting-response-info.dto';
+import { UpdateGreetingDto } from './dto/update-greeting.dto';
+import { MessageResponseDto } from './dto/message-response.dto';
 
 @Controller('greetings')
 export class GreetingsController {
@@ -19,7 +27,9 @@ export class GreetingsController {
   }
 
   @Get('/info/:id')
-  async getGreetingInfo(@Param() dto: GreetingIdDto): Promise<GreetingResponseInfoDto> {
+  async getGreetingInfo(
+    @Param() dto: GreetingIdDto,
+  ): Promise<GreetingResponseInfoDto> {
     const greetingInfo = await this.greetingsService.getGreetingInfo(dto);
     return plainToInstance(GreetingResponseInfoDto, greetingInfo);
   }
@@ -30,19 +40,25 @@ export class GreetingsController {
   }
 
   @Post()
-  async createGreeting(@Body() dto: CreateGreetingDto): Promise<GreetingResponseCreationDto> {
+  async createGreeting(
+    @Body() dto: CreateGreetingDto,
+  ): Promise<GreetingResponseCreationDto> {
     const newGreeting = await this.greetingsService.createGreeting(dto);
     return plainToInstance(GreetingResponseCreationDto, newGreeting);
   }
 
   @Put()
-  async updateGreeting(@Body() dto: UpdateGreetingDto): Promise<GreetingResponseCreationDto> {
+  async updateGreeting(
+    @Body() dto: UpdateGreetingDto,
+  ): Promise<GreetingResponseCreationDto> {
     const updatedGreeting = await this.greetingsService.updateGreeting(dto);
     return plainToInstance(GreetingResponseCreationDto, updatedGreeting);
   }
 
   @Delete(':id')
-  async deleteGreeting(@Param() dto: GreetingIdDto): Promise<MessageResponseDto> {
+  async deleteGreeting(
+    @Param() dto: GreetingIdDto,
+  ): Promise<MessageResponseDto> {
     const message = await this.greetingsService.deleteGreeting(dto);
     return plainToInstance(MessageResponseDto, message);
   }

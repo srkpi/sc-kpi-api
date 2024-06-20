@@ -1,12 +1,12 @@
-import {Expose} from "class-transformer";
+import { Expose } from 'class-transformer';
 
 export class GreetingResponseCreationDto {
-    @Expose()
-    id: number;
+  @Expose()
+  id: number;
 
-    @Expose()
-    greeting: string;
+  @Expose()
+  greeting: string;
 
-    @Expose()
-    name: string;
+  @Expose()
+  name: string;
 }

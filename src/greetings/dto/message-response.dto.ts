@@ -1,6 +1,6 @@
-import {Expose} from "class-transformer";
+import { Expose } from 'class-transformer';
 
 export class MessageResponseDto {
-    @Expose()
-    message: string;
+  @Expose()
+  message: string;
 }
