@@ -1,6 +1,6 @@
 import { Expose } from 'class-transformer';
 
-export class ReadProjectDto {
+export class ReadClubProjectDto {
   @Expose()
   id: number;
 

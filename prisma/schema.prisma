@@ -21,13 +21,13 @@ model Faq {
 }
 
 model Club {
-  id          Int       @id() @default(autoincrement())
+  id          Int           @id() @default(autoincrement())
   name        String
   description String
-  projects    Project[]
+  projects    ClubProject[]
 }
 
-model Project {
+model ClubProject {
   id          Int    @id() @default(autoincrement())
   name        String
   description String

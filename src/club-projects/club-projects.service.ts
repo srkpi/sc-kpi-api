@@ -1,25 +1,25 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateProjectDto } from './dto/create-project.dto';
-import { UpdateProjectDto } from './dto/update-project.dto';
+import { CreateClubProjectDto } from './dto/create-club-project.dto';
+import { UpdateClubProjectDto } from './dto/update-club-project.dto';
 
 @Injectable()
-export class ProjectsService {
+export class ClubProjectsService {
   constructor(private prismaService: PrismaService) {}
 
-  async create(createProjectDto: CreateProjectDto) {
-    const createdProject = await this.prismaService.project.create({
+  async create(createProjectDto: CreateClubProjectDto) {
+    const createdProject = await this.prismaService.clubProject.create({
       data: createProjectDto,
     });
     return createdProject;
   }
 
   async findAll() {
-    return await this.prismaService.project.findMany();
+    return await this.prismaService.clubProject.findMany();
   }
 
   async findOne(id: number) {
-    const project = await this.prismaService.project.findUnique({
+    const project = await this.prismaService.clubProject.findUnique({
       where: { id },
     });
     if (!project) {
@@ -28,9 +28,9 @@ export class ProjectsService {
     return project;
   }
 
-  async update(updateProjectDto: UpdateProjectDto) {
+  async update(updateProjectDto: UpdateClubProjectDto) {
     try {
-      const updatedProject = await this.prismaService.project.update({
+      const updatedProject = await this.prismaService.clubProject.update({
         where: { id: updateProjectDto.id },
         data: updateProjectDto,
       });
@@ -42,7 +42,7 @@ export class ProjectsService {
 
   async remove(id: number) {
     try {
-      await this.prismaService.project.delete({ where: { id } });
+      await this.prismaService.clubProject.delete({ where: { id } });
     } catch {
       throw new NotFoundException('Project with this ID does not exist');
     }

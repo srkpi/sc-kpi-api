@@ -1,5 +1,5 @@
 import { Expose, Type } from 'class-transformer';
-import { ReadProjectDto } from '../../projects/dto/read-project.dto';
+import { ReadClubProjectDto } from '../../club-projects/dto/read-club-project.dto';
 
 export class ReadClubDto {
   @Expose()
@@ -12,6 +12,6 @@ export class ReadClubDto {
   description: string;
 
   @Expose()
-  @Type(() => ReadProjectDto)
-  projects: ReadProjectDto[];
+  @Type(() => ReadClubProjectDto)
+  projects: ReadClubProjectDto[];
 }
