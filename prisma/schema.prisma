@@ -19,3 +19,19 @@ model Faq {
   answer   String
   category String?
 }
+
+model Club {
+  id          Int           @id() @default(autoincrement())
+  name        String
+  description String
+  projects    ClubProject[]
+}
+
+model ClubProject {
+  id          Int    @id() @default(autoincrement())
+  name        String
+  description String
+  club        Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  clubId      Int
+  image       String
+}
