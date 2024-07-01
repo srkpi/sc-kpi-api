@@ -1,8 +1,8 @@
 import { IsInt } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class ClubProjectIdDto {
+export class ProjectIdDto {
   @Type(() => Number)
   @IsInt()
-  id: number;
+  projectId: number;
 }

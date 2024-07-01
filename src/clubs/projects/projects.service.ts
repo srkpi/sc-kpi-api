@@ -1,21 +1,21 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateClubProjectDto } from './dto/create-club-project.dto';
-import { UpdateClubProjectDto } from './dto/update-club-project.dto';
+import { CreateProjectDto } from './dto/create-project.dto';
+import { UpdateProjectDto } from './dto/update-project.dto';
 
 @Injectable()
-export class ClubProjectsService {
+export class ProjectsService {
   constructor(private prismaService: PrismaService) {}
 
-  async create(createProjectDto: CreateClubProjectDto) {
+  async create(createProjectDto: CreateProjectDto) {
     const createdProject = await this.prismaService.clubProject.create({
       data: createProjectDto,
     });
     return createdProject;
   }
 
-  async findAll() {
-    return await this.prismaService.clubProject.findMany();
+  async findAll(clubId: number) {
+    return await this.prismaService.clubProject.findMany({ where: { clubId } });
   }
 
   async findOne(id: number) {
@@ -28,7 +28,7 @@ export class ClubProjectsService {
     return project;
   }
 
-  async update(updateProjectDto: UpdateClubProjectDto) {
+  async update(updateProjectDto: UpdateProjectDto) {
     try {
       const updatedProject = await this.prismaService.clubProject.update({
         where: { id: updateProjectDto.id },

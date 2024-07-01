@@ -37,12 +37,12 @@ export class ClubsController {
     return plainToInstance(ReadClubDto, res);
   }
 
-  @Get(':id')
+  @Get(':clubId')
   @ApiResponse({ status: 200, type: ReadClubDto })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 404, description: 'Club not found' })
   async findOne(@Param() dto: ClubIdDto): Promise<ReadClubDto> {
-    const res = await this.clubsService.findOne(dto.id);
+    const res = await this.clubsService.findOne(dto.clubId);
     return plainToInstance(ReadClubDto, res);
   }
 
@@ -55,12 +55,12 @@ export class ClubsController {
     return plainToInstance(ReadClubDto, res);
   }
 
-  @Delete(':id')
+  @Delete(':clubId')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiResponse({ status: 204, description: 'Club deleted successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 404, description: 'Club with this ID does not exist' })
   async remove(@Param() dto: ClubIdDto): Promise<void> {
-    await this.clubsService.remove(dto.id);
+    await this.clubsService.remove(dto.clubId);
   }
 }

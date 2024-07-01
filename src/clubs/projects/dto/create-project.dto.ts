@@ -1,6 +1,6 @@
 import { IsInt, IsNotEmpty, IsString, IsUrl } from 'class-validator';
 
-export class CreateClubProjectDto {
+export class CreateProjectDto {
   @IsInt()
   @IsNotEmpty()
   clubId: number;

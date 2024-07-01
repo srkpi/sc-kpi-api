@@ -11,10 +11,10 @@ export class CreateClubDto {
 
   @IsOptional()
   @IsArray()
-  projects: CreateProjectDto[];
+  projects: CreateClubProjectDto[];
 }
 
-class CreateProjectDto {
+class CreateClubProjectDto {
   @IsString()
   @IsNotEmpty()
   name: string;
