@@ -7,6 +7,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { FaqModule } from './faq/faq.module';
 import { ClubsModule } from './clubs/clubs.module';
 import { ClubProjectsModule } from './club-projects/club-projects.module';
+import { ScheduleModule } from './schedule/schedule.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ClubProjectsModule } from './club-projects/club-projects.module';
     FaqModule,
     ClubsModule,
     ClubProjectsModule,
+    ScheduleModule,
   ],
   controllers: [AppController],
   providers: [AppService],
