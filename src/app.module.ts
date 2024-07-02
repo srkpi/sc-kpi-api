@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ClubsModule } from './clubs/clubs.module';
+import { FaqModule } from './faq/faq.module';
 import { GreetingsModule } from './greetings/greetings.module';
-import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
 import { FaqModule } from './faq/faq.module';
 import { ClubsModule } from './clubs/clubs.module';
-import { ClubProjectsModule } from './club-projects/club-projects.module';
 import { ScheduleModule } from './schedule/schedule.module';
 
 @Module({
@@ -16,7 +17,6 @@ import { ScheduleModule } from './schedule/schedule.module';
     PrismaModule,
     FaqModule,
     ClubsModule,
-    ClubProjectsModule,
     ScheduleModule,
   ],
   controllers: [AppController],
