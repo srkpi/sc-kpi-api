@@ -193,15 +193,17 @@ export class ScheduleService {
 
       if (positionData) {
         position = positionData.name;
-        subdivision = positionData.subdivision.name;
+        subdivision = ' ' + positionData.subdivision.name + ' ';
       }
+    } else {
+      position = 'пос.';
     }
 
     const shortenedPosition = this.shortenPosition(position);
     const shortenedFullName = this.shortenFullName(pairData.teacherName);
 
     const summary = `${pairData.name} [${pairData.place} ${pairData.type}] (${shortenedPosition} ${shortenedFullName})`;
-    const description = `${pairData.place} ${pairData.type} з ${pairData.name}, викладач: ${position.toLowerCase()} ${subdivision} ${pairData.teacherName}`;
+    const description = `${pairData.place} ${pairData.type} з ${pairData.name}, викладач: ${position.toLowerCase()}${subdivision ? subdivision : ' '}${pairData.teacherName}`;
     return {
       summary,
       description,
