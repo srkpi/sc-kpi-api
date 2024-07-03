@@ -26,27 +26,37 @@ export class ScheduleController {
     @Res() res: Response,
   ) {
     if (error) {
-      //add redirect to default schedule
-      return res.status(400).json({ message: 'Authorization denied', error });
+      //Authorization denied
+      return res.redirect(
+        this.config.get<string>('FRONTEND_DEFAULT_SCHEDULE_URI'),
+      );
     }
     //properly handle code missing
     if (!code) {
-      return res.status(400).json({ message: 'Authorization code missing' });
+      return res.redirect(
+        this.config.get<string>('FRONTEND_DEFAULT_SCHEDULE_URI'),
+      );
+      // return res.status(400).json({ message: 'Authorization code missing' });
     }
 
     try {
       res.cookie('oauth_code', code, {
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: 'strict',
         maxAge: 900000, //15 minutes
       });
 
-      return res.redirect(this.config.get<string>('FRONTEND_REDIRECT_URI'));
+      // question about data transfer
+      return res.redirect(this.config.get<string>('FRONTEND_IMPORT_PAGE_URI'));
     } catch (error) {
+      //handle redirect
       console.error('Error during token exchange: ', error);
-      return res
-        .status(500)
-        .json({ message: 'Error during token exchange', error: error.message });
+      return res.redirect(
+        this.config.get<string>('FRONTEND_DEFAULT_SCHEDULE_URI'),
+      );
+      // return res
+      //   .status(500)
+      //   .json({ message: 'Error during token exchange', error: error.message });
     }
   }
 
@@ -59,7 +69,7 @@ export class ScheduleController {
     const code = req.cookies['oauth_code'];
     res.clearCookie('oauth_code', {
       httpOnly: true,
-      sameSite: 'lax',
+      sameSite: 'strict',
       maxAge: 900000, //15 minutes
     });
     if (!code) {
