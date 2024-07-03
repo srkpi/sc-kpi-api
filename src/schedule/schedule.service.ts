@@ -123,15 +123,26 @@ export class ScheduleService {
     };
   }
 
-  private formatDateToGoogleCalendarUTC(date: Date): string {
-    const pad = (number) => (number < 10 ? `0${number}` : number);
+  private getTimezoneOffset(timeZone: string) {
+    const str = new Date().toLocaleString('en', {
+      timeZone,
+      timeZoneName: 'longOffset',
+    });
+    const [_, h, m] = str.match(/([+-]\d+):(\d+)$/) || [, '+00', '00'];
+    return -(+h * 60 + (+h > 0 ? +m : -m));
+  }
 
-    const year = date.getUTCFullYear();
-    const month = pad(date.getUTCMonth() + 1); // Months are zero-indexed
-    const day = pad(date.getUTCDate());
-    const hours = pad(date.getUTCHours());
-    const minutes = pad(date.getUTCMinutes());
-    const seconds = pad(date.getUTCSeconds());
+  private formatDateToUTCString(date: Date, timeZone: string) {
+    const offset = this.getTimezoneOffset(timeZone);
+
+    const utcDate = new Date(date.getTime() + offset * 60000);
+
+    const year = utcDate.getUTCFullYear();
+    const month = String(utcDate.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(utcDate.getUTCDate()).padStart(2, '0');
+    const hours = String(utcDate.getUTCHours()).padStart(2, '0');
+    const minutes = String(utcDate.getUTCMinutes()).padStart(2, '0');
+    const seconds = String(utcDate.getUTCSeconds()).padStart(2, '0');
 
     return `${year}${month}${day}T${hours}${minutes}${seconds}Z`;
   }
@@ -206,8 +217,10 @@ export class ScheduleService {
     semesterEndDate: Date,
   ) {
     const pairEventInfo = await this.generatePairEventInfo(pairData);
-    const untilDateFormatted =
-      this.formatDateToGoogleCalendarUTC(semesterEndDate);
+    const untilDateFormatted = this.formatDateToUTCString(
+      semesterEndDate,
+      'Europe/Kyiv',
+    );
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
     return await calendar.events.insert({

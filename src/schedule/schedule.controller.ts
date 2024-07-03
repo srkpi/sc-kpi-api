@@ -26,9 +26,10 @@ export class ScheduleController {
     @Res() res: Response,
   ) {
     if (error) {
+      //add redirect to default schedule
       return res.status(400).json({ message: 'Authorization denied', error });
     }
-
+    //properly handle code missing
     if (!code) {
       return res.status(400).json({ message: 'Authorization code missing' });
     }

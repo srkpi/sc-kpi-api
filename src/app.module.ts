@@ -6,8 +6,6 @@ import { ClubsModule } from './clubs/clubs.module';
 import { FaqModule } from './faq/faq.module';
 import { GreetingsModule } from './greetings/greetings.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { FaqModule } from './faq/faq.module';
-import { ClubsModule } from './clubs/clubs.module';
 import { ScheduleModule } from './schedule/schedule.module';
 
 @Module({
