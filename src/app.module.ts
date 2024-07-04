@@ -6,6 +6,7 @@ import { ClubsModule } from './clubs/clubs.module';
 import { FaqModule } from './faq/faq.module';
 import { GreetingsModule } from './greetings/greetings.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { DepartmentsModule } from './departments/departments.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { PrismaModule } from './prisma/prisma.module';
     PrismaModule,
     FaqModule,
     ClubsModule,
+    DepartmentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
