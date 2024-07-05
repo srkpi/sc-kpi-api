@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Post, Query, Req, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Logger,
+  Post,
+  Query,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { ScheduleService } from './schedule.service';
 import { ApiTags } from '@nestjs/swagger';
 import { Response, Request } from 'express';
@@ -8,6 +17,8 @@ import { ConfigService } from '@nestjs/config';
 @ApiTags('schedule')
 @Controller('schedule')
 export class ScheduleController {
+  private readonly logger = new Logger(ScheduleController.name);
+
   constructor(
     private readonly scheduleService: ScheduleService,
     private readonly config: ConfigService,
@@ -50,7 +61,7 @@ export class ScheduleController {
       return res.redirect(this.config.get<string>('FRONTEND_IMPORT_PAGE_URI'));
     } catch (error) {
       //handle redirect
-      console.error('Error during token exchange: ', error);
+      this.logger.error('Error during token exchange: ', error);
       return res.redirect(
         this.config.get<string>('FRONTEND_DEFAULT_SCHEDULE_URI'),
       );
@@ -83,7 +94,7 @@ export class ScheduleController {
       );
       return res.json({ message: 'Calendar created and events added' });
     } catch (e) {
-      console.error('Error during calendar creation: ', e);
+      this.logger.error('Error during calendar creation: ', e);
       return res
         .status(500)
         .json({ message: 'Error during calendar creation' });

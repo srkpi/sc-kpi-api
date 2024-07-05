@@ -7,6 +7,7 @@ import { firstValueFrom } from 'rxjs';
 import { Weekdays } from './enums/weekdays.enum';
 import { SchedulePairDto } from './dto/schedule-pair.dto';
 import { HttpService } from '@nestjs/axios';
+import { ScheduleUtil } from './util/schedule.util';
 
 @Injectable()
 export class ScheduleService {
@@ -57,121 +58,6 @@ export class ScheduleService {
     return newCalendar.data;
   }
 
-  private getSemesterStart() {
-    const currentDate = new Date();
-    const kyivFormatter = new Intl.DateTimeFormat('en-US', {
-      timeZone: 'Europe/Kyiv',
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      second: 'numeric',
-    });
-    const kyivDateString = kyivFormatter.format(currentDate);
-    const [month, day, year] = kyivDateString.split(/[/\s,:]+/).map(Number);
-
-    const kyivDate = new Date(year, month - 1, day);
-
-    let startYear = kyivDate.getFullYear();
-    if (kyivDate.getMonth() < 7 && kyivDate.getDate() < 31) {
-      startYear--;
-    }
-
-    //31 august
-    const scheduleStartFirst = new Date(startYear, 7, 31);
-    const firstSeptember = new Date(startYear, 8, 1);
-
-    let semesterStartFirst = firstSeptember;
-    if (firstSeptember.getDay() > 0 && firstSeptember.getDay() < 4) {
-      semesterStartFirst.setDate(
-        semesterStartFirst.getDate() - (firstSeptember.getDay() - 1),
-      );
-    } else {
-      let startDay = 2;
-      do {
-        semesterStartFirst = new Date(startYear, 8, startDay);
-        startDay++;
-      } while (semesterStartFirst.getDay() !== 1);
-    }
-
-    const scheduleStartSecond = new Date(semesterStartFirst);
-    scheduleStartSecond.setDate(scheduleStartSecond.getDate() + 22 * 7 - 1);
-    // const scheduleEndSecond = new Date(
-    //   scheduleStartSecond.getFullYear(),
-    //   7,
-    //   31,
-    // );
-    const semesterStartSecond = new Date(semesterStartFirst);
-    semesterStartSecond.setDate(semesterStartSecond.getDate() + 22 * 7);
-
-    const semester =
-      kyivDate >= scheduleStartFirst && kyivDate < scheduleStartSecond ? 1 : 2;
-
-    let semesterEnd = null;
-    if (semester === 1) {
-      semesterEnd = new Date(semesterStartFirst);
-    } else {
-      semesterEnd = new Date(semesterStartSecond);
-    }
-    semesterEnd.setDate(semesterEnd.getDate() + 18 * 7);
-
-    return {
-      semester,
-      semesterStart: semester === 1 ? semesterStartFirst : semesterStartSecond,
-      semesterEnd,
-    };
-  }
-
-  private getTimezoneOffset(timeZone: string) {
-    const str = new Date().toLocaleString('en', {
-      timeZone,
-      timeZoneName: 'longOffset',
-    });
-    const [_, h, m] = str.match(/([+-]\d+):(\d+)$/) || [, '+00', '00'];
-    return -(+h * 60 + (+h > 0 ? +m : -m));
-  }
-
-  private formatDateToUTCString(date: Date, timeZone: string) {
-    const offset = this.getTimezoneOffset(timeZone);
-
-    const utcDate = new Date(date.getTime() + offset * 60000);
-
-    const year = utcDate.getUTCFullYear();
-    const month = String(utcDate.getUTCMonth() + 1).padStart(2, '0');
-    const day = String(utcDate.getUTCDate()).padStart(2, '0');
-    const hours = String(utcDate.getUTCHours()).padStart(2, '0');
-    const minutes = String(utcDate.getUTCMinutes()).padStart(2, '0');
-    const seconds = String(utcDate.getUTCSeconds()).padStart(2, '0');
-
-    return `${year}${month}${day}T${hours}${minutes}${seconds}Z`;
-  }
-
-  private shortenPosition(position: string) {
-    const SHORT_POSITIONS = {
-      асистент: 'асис.',
-      викладач: 'вик.',
-      'старший викладач': 'ст.вик.',
-      доцент: 'доц.',
-      професор: 'проф.',
-      посади: 'пос.',
-    };
-
-    return SHORT_POSITIONS[position.toLowerCase()] || position.toLowerCase();
-  }
-
-  private shortenFullName(fullName: string) {
-    const parts = fullName.split(' ');
-    return parts
-      .map((value, index) => {
-        if (index > 0) {
-          return value[0].toUpperCase() + '.';
-        }
-        return value;
-      })
-      .join(' ');
-  }
-
   private async generatePairEventInfo(pairData: SchedulePairDto) {
     const encodedName = encodeURIComponent(pairData.teacherName);
     const urlFindId = `https://api.campus.kpi.ua/intellect/v2/find?value=${encodedName}&pageNumber=1&pageSize=1`;
@@ -199,8 +85,10 @@ export class ScheduleService {
       position = 'пос.';
     }
 
-    const shortenedPosition = this.shortenPosition(position);
-    const shortenedFullName = this.shortenFullName(pairData.teacherName);
+    const shortenedPosition = ScheduleUtil.shortenPosition(position);
+    const shortenedFullName = ScheduleUtil.shortenFullName(
+      pairData.teacherName,
+    );
 
     const summary = `${pairData.name} [${pairData.place} ${pairData.type}] (${shortenedPosition} ${shortenedFullName})`;
     const description = `${pairData.place} ${pairData.type} з ${pairData.name}, викладач: ${position.toLowerCase()}${subdivision ? subdivision : ' '}${pairData.teacherName}`;
@@ -219,7 +107,7 @@ export class ScheduleService {
     semesterEndDate: Date,
   ) {
     const pairEventInfo = await this.generatePairEventInfo(pairData);
-    const untilDateFormatted = this.formatDateToUTCString(
+    const untilDateFormatted = ScheduleUtil.formatDateToUTCString(
       semesterEndDate,
       'Europe/Kyiv',
     );
@@ -253,7 +141,8 @@ export class ScheduleService {
     scheduleDto: CreateScheduleDto,
     oauth2Client: OAuth2Client,
   ) {
-    const { semester, semesterStart, semesterEnd } = this.getSemesterStart();
+    const { semester, semesterStart, semesterEnd } =
+      ScheduleUtil.getSemesterStart();
     const calendarData = await this.createCalendar(
       oauth2Client,
       scheduleDto.groupName,
