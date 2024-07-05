@@ -8,14 +8,13 @@ export class ProjectsService {
   constructor(private prismaService: PrismaService) {}
 
   async create(createProjectDto: CreateProjectDto) {
-    const createdProject = await this.prismaService.departmentProject.create({
+    return this.prismaService.departmentProject.create({
       data: createProjectDto,
     });
-    return createdProject;
   }
 
   async findAll(departmentId: number) {
-    return await this.prismaService.departmentProject.findMany({
+    return this.prismaService.departmentProject.findMany({
       where: { departmentId },
     });
   }
@@ -32,11 +31,10 @@ export class ProjectsService {
 
   async update(updateProjectDto: UpdateProjectDto) {
     try {
-      const updatedProject = await this.prismaService.departmentProject.update({
+      return await this.prismaService.departmentProject.update({
         where: { id: updateProjectDto.id },
         data: updateProjectDto,
       });
-      return updatedProject;
     } catch {
       throw new NotFoundException('Project with this ID does not exist');
     }
