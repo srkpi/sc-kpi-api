@@ -5,13 +5,14 @@ import {
   UnauthorizedException,
   Logger,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Observable } from 'rxjs';
 
 @Injectable()
 export class ApiKeyGuard implements CanActivate {
   private readonly logger = new Logger(ApiKeyGuard.name);
 
-  constructor() {
+  constructor(private configService: ConfigService) {
     if (!process.env.X_API_KEY) {
       this.logger.warn('X_API_KEY is missing. Routes are unprotected.');
     }
@@ -24,8 +25,8 @@ export class ApiKeyGuard implements CanActivate {
     }
     const request = context.switchToHttp().getRequest();
     const apiKey = request.headers['x-api-key'];
-
-    if (!apiKey || apiKey !== process.env.X_API_KEY) {
+    const xApiKey = this.configService.get<string>('X_API_KEY');
+    if (!apiKey || apiKey !== xApiKey) {
       throw new UnauthorizedException('Invalid API key');
     }
 

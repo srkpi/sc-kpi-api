@@ -6,8 +6,10 @@ import {
 import { Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ApiKeyGuard } from './guards/api-key.guard';
+import { ConfigService } from '@nestjs/config';
 
 export function setup(app: INestApplication) {
+  const configService = app.get(ConfigService);
   app.useGlobalInterceptors(
     new ClassSerializerInterceptor(app.get(Reflector), {
       strategy: 'excludeAll',
@@ -31,7 +33,7 @@ export function setup(app: INestApplication) {
       'x-api-key',
     ],
   });
-  app.useGlobalGuards(new ApiKeyGuard());
+  app.useGlobalGuards(new ApiKeyGuard(configService));
   const config = new DocumentBuilder()
     .setTitle('Api test')
     .setDescription('Api description')
