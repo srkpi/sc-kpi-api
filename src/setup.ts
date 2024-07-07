@@ -17,12 +17,12 @@ export function setup(app: INestApplication) {
     }),
   );
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+  const origins = configService
+    .get<string>('ORIGINS')
+    .split(',')
+    .map((origin) => origin.trim());
   app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      'https://sckpi.vercel.app',
-      'https://sckpi-dev.vercel.app',
-    ],
+    origin: origins,
     methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: [
       'Content-Type',
