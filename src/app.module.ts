@@ -7,15 +7,17 @@ import { FaqModule } from './faq/faq.module';
 import { GreetingsModule } from './greetings/greetings.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { DepartmentsModule } from './departments/departments.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
     GreetingsModule,
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     FaqModule,
     ClubsModule,
     DepartmentsModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
