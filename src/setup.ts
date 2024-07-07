@@ -36,6 +36,8 @@ export function setup(app: INestApplication) {
     .setTitle('Api test')
     .setDescription('Api description')
     .setVersion('1.0')
+    .addApiKey({ type: 'apiKey', name: 'x-api-key', in: 'header' }, 'x-api-key')
+    .addSecurityRequirements('x-api-key')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);

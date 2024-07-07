@@ -1,21 +1,21 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  HttpStatus,
+  Get,
   HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
 } from '@nestjs/common';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { plainToInstance } from 'class-transformer';
 import { DepartmentsService } from './departments.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
-import { UpdateDepartmentDto } from './dto/update-department.dto';
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ReadDepartmentDto } from './dto/read-department.dto';
-import { plainToInstance } from 'class-transformer';
 import { DepartmentIdDto } from './dto/department-id.dto';
+import { ReadDepartmentDto } from './dto/read-department.dto';
+import { UpdateDepartmentDto } from './dto/update-department.dto';
 
 @ApiTags('departments')
 @Controller('departments')
