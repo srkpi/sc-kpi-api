@@ -11,7 +11,7 @@ import { DepartmentsModule } from './departments/departments.module';
 @Module({
   imports: [
     GreetingsModule,
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
     FaqModule,
     ClubsModule,
