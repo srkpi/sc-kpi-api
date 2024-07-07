@@ -7,15 +7,17 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { GreetingsService } from './greetings.service';
-import { CreateGreetingDto } from './dto/create-greeting.dto';
+import { ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
-import { GreetingResponseCreationDto } from './dto/greeting-response-creation.dto';
+import { CreateGreetingDto } from './dto/create-greeting.dto';
 import { GreetingIdDto } from './dto/greeting-id.dto';
+import { GreetingResponseCreationDto } from './dto/greeting-response-creation.dto';
 import { GreetingResponseInfoDto } from './dto/greeting-response-info.dto';
-import { UpdateGreetingDto } from './dto/update-greeting.dto';
 import { MessageResponseDto } from './dto/message-response.dto';
+import { UpdateGreetingDto } from './dto/update-greeting.dto';
+import { GreetingsService } from './greetings.service';
 
+@ApiTags('greetings')
 @Controller('greetings')
 export class GreetingsController {
   constructor(private readonly greetingsService: GreetingsService) {}

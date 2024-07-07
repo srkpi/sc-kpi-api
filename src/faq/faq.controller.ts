@@ -12,10 +12,10 @@ import {
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { plainToInstance } from 'class-transformer';
 import { CreateFaqDto } from './dto/create-faq.dto';
+import { FaqIdDto } from './dto/faq-id.dto';
 import { ReadFaqDto } from './dto/read-faq.dto';
 import { UpdateFaqDto } from './dto/update-faq.dto';
 import { FaqService } from './faq.service';
-import { FaqIdDto } from './dto/faq-id.dto';
 
 @ApiTags('faq')
 @Controller('faq')
