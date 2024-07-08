@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { OAuth2Client } from 'google-auth-library';
+import { Credentials, OAuth2Client } from 'google-auth-library';
 import { google } from 'googleapis';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { firstValueFrom } from 'rxjs';
@@ -35,9 +35,15 @@ export class ScheduleService {
     });
   }
 
-  async getUserClient(code: string) {
+  async getUserTokens(code: string) {
     const oauth2Client = this.createOAuth2Client();
     const { tokens } = await oauth2Client.getToken(code);
+    tokens.expiry_date = Date.now() + 15 * 60 * 1000;
+    return tokens;
+  }
+
+  async getUserClient(tokens: Credentials) {
+    const oauth2Client = this.createOAuth2Client();
     oauth2Client.setCredentials(tokens);
     return oauth2Client;
   }

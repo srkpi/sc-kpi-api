@@ -35,6 +35,7 @@
     "google-auth-library": "^9.11.0",
     "googleapis": "^140.0.1",
     "prisma": "^5.15.0",
+    "qs": "^6.12.2",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1"
   },

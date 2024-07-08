@@ -51,7 +51,9 @@ export class ScheduleController {
     }
 
     try {
-      res.cookie('oauth_code', code, {
+      const tokens = await this.scheduleService.getUserTokens(code);
+
+      res.cookie('tokens', JSON.stringify(tokens), {
         httpOnly: true,
         sameSite: 'strict',
         maxAge: 900000, //15 minutes
@@ -77,17 +79,20 @@ export class ScheduleController {
     @Body() scheduleDto: CreateScheduleDto,
     @Res() res: Response,
   ) {
-    const code = req.cookies['oauth_code'];
-    res.clearCookie('oauth_code', {
+    const tokensString = req.cookies['tokens'];
+    res.clearCookie('tokens', {
       httpOnly: true,
       sameSite: 'strict',
       maxAge: 900000, //15 minutes
     });
-    if (!code) {
-      return res.status(400).json({ message: 'Authorization code missing' });
+
+    if (!tokensString) {
+      return res.status(400).json({ message: 'Authorization tokens missing' });
     }
     try {
-      const oauth2Client = await this.scheduleService.getUserClient(code);
+      const oauth2Client = await this.scheduleService.getUserClient(
+        JSON.parse(tokensString),
+      );
       await this.scheduleService.createSemesterSchedule(
         scheduleDto,
         oauth2Client,
