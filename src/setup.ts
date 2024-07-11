@@ -6,11 +6,11 @@ import {
 import { Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
+import { ApiKeyGuard } from './guards/api-key.guard';
 import { ConfigService } from '@nestjs/config';
 
 export function setup(app: INestApplication) {
   const configService = app.get(ConfigService);
-
   app.useGlobalInterceptors(
     new ClassSerializerInterceptor(app.get(Reflector), {
       strategy: 'excludeAll',
@@ -23,7 +23,6 @@ export function setup(app: INestApplication) {
     .get<string>('ORIGINS')
     .split(',')
     .map((origin) => origin.trim());
-  console.log(origins);
   app.enableCors({
     origin: origins,
     methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -37,10 +36,14 @@ export function setup(app: INestApplication) {
     ],
     credentials: true,
   });
+  });
+  app.useGlobalGuards(new ApiKeyGuard(configService));
   const config = new DocumentBuilder()
     .setTitle('Api test')
     .setDescription('Api description')
     .setVersion('1.0')
+    .addApiKey({ type: 'apiKey', name: 'x-api-key', in: 'header' }, 'x-api-key')
+    .addSecurityRequirements('x-api-key')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);

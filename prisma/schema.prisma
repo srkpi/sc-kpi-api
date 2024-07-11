@@ -35,3 +35,22 @@ model ClubProject {
   clubId      Int
   image       String
 }
+
+model Department {
+  id               Int                 @id() @default(autoincrement())
+  name             String
+  description      String
+  shortDescription String
+  image            String
+  buttonLink       String
+  projects         DepartmentProject[]
+}
+
+model DepartmentProject {
+  id           Int        @id() @default(autoincrement())
+  name         String
+  description  String
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  departmentId Int
+  image        String
+}
