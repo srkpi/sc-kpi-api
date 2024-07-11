@@ -40,12 +40,12 @@ export class ScheduleUtil {
     }
 
     if (courseIdentifier === Courses['6 курс ОНП']) {
+      const semesterEnd = new Date(semesterStartFirst);
+      semesterEnd.setDate(semesterEnd.getDate() + 18 * 7);
       return {
         semester: 1,
         semesterStart: semesterStartFirst,
-        semesterEnd: new Date(semesterStartFirst).setDate(
-          semesterStartFirst.getDate() + 18 * 7,
-        ),
+        semesterEnd,
       };
     }
 

@@ -9,7 +9,7 @@ import {
   Res,
 } from '@nestjs/common';
 import { ScheduleService } from './schedule.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response, Request } from 'express';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { ConfigService } from '@nestjs/config';
@@ -70,6 +70,12 @@ export class ScheduleController {
   }
 
   @Post('create')
+  @ApiResponse({
+    status: 201,
+    description: 'Calendar created and events added',
+  })
+  @ApiResponse({ status: 400, description: 'Time is up' })
+  @ApiResponse({ status: 500, description: 'Server error' })
   async createCallback(
     @Req() req: Request,
     @Body() scheduleDto: CreateScheduleDto,
@@ -83,7 +89,7 @@ export class ScheduleController {
     });
 
     if (!tokensString) {
-      return res.status(400).json({ message: 'Authorization tokens missing' });
+      return res.status(400).json({ message: 'Time is up' });
     }
     try {
       const oauth2Client = await this.scheduleService.getUserClient(
@@ -93,7 +99,9 @@ export class ScheduleController {
         scheduleDto,
         oauth2Client,
       );
-      return res.json({ message: 'Calendar created and events added' });
+      return res
+        .status(201)
+        .json({ message: 'Calendar created and events added' });
     } catch (e) {
       this.logger.error('Error during calendar creation: ', e);
       return res
