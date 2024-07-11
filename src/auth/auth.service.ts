@@ -15,6 +15,7 @@ import { v4 as uuid } from 'uuid';
 import { LoginDto } from './dto';
 import { RegisterDto } from './dto/register.dto';
 import { JwtPayload, Tokens } from './types';
+import nodemailer from 'nodemailer';
 
 @Injectable()
 export class AuthService {
@@ -96,6 +97,29 @@ export class AuthService {
   clearAuthCookies(res: Response) {
     res.clearCookie('refreshToken', this.cookieOptions);
     res.clearCookie('deviceId', this.cookieOptions);
+  }
+
+  async updatePassword(email: string) {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: this.config.get<string>('EMAIL_USERNAME'),
+        pass: this.config.get<string>('EMAIL_PASSWORD'),
+      },
+    });
+
+    const resetLink =
+      this.config.get<string>('API_URL') + `/auth/reset-password?token=1111`;
+
+    await transporter.sendMail({
+      from: '"SR KPI administration" <srkpinotification@gmail.com>',
+      to: email,
+      subject: 'Password reset request',
+      html: `
+      <p>Please click on the following link to reset your password: <a href="${resetLink}">${resetLink}</a></p>
+      <p>If you did not request a password reset, please ignore this message. It's possible that another user entered your email address by mistake. No changes have been made to your account.</p>
+      `,
+    });
   }
 
   private async updateRtHash(userId: number, rt: string, deviceId: string) {

