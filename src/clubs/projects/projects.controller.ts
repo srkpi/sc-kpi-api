@@ -15,8 +15,11 @@ import { ProjectIdDto } from './dto/project-id.dto';
 import { ReadProjectDto } from './dto/read-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { ProjectsService } from './projects.service';
+import { Role } from 'src/auth/types';
+import { Roles } from 'src/auth/decorators';
 
 @ApiTags('clubs')
+@Roles(Role.Admin)
 @Controller('clubs/projects')
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}

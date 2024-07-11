@@ -1,6 +1,6 @@
 import { IsEmail, IsNotEmpty, IsStrongPassword } from 'class-validator';
 
-export class AuthDto {
+export class LoginDto {
   @IsNotEmpty()
   @IsEmail()
   email: string;

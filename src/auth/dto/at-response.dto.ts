@@ -1,9 +1,6 @@
 import { Expose } from 'class-transformer';
 
-export class TokensDto {
+export class AtResponseDto {
   @Expose()
   accessToken: string;
-
-  @Expose()
-  refreshToken: string;
 }

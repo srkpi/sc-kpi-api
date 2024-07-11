@@ -1,49 +1,75 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Post,
+  Res,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
-import { plainToInstance } from 'class-transformer';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Response } from 'express';
 import { AuthService } from './auth.service';
-import { User } from './decorators';
-import { AuthDto, TokensDto } from './dto';
-import { AtGuard, RtGuard } from './guards';
-import { JwtPayload, JwtRtPayload } from './types';
+import { Public, User } from './decorators';
+import { LoginDto, RegisterDto } from './dto';
+import { AtResponseDto } from './dto/at-response.dto';
+import { RtGuard } from './guards';
+import { JwtRtPayload, Role } from './types';
+import { Roles } from './decorators/roles.decorator';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @Public()
   @Post('local/sign-in')
   @HttpCode(HttpStatus.OK)
-  async signInLocal(@Body() dto: AuthDto): Promise<TokensDto> {
-    const tokens = await this.authService.signIn(dto);
-    return plainToInstance(TokensDto, tokens);
+  @ApiResponse({ type: AtResponseDto })
+  async login(@Body() dto: LoginDto, @Res() res: Response) {
+    const tokens = await this.authService.login(dto);
+    this.authService.setAuthCookies(res, tokens);
+    res.json({ accessToken: tokens.accessToken });
   }
 
+  @Public()
   @Post('local/sign-up')
   @HttpCode(HttpStatus.CREATED)
-  async signUpLocal(@Body() dto: AuthDto): Promise<TokensDto> {
-    const tokens = await this.authService.signUp(dto);
-    return plainToInstance(TokensDto, tokens);
+  @ApiResponse({ type: AtResponseDto })
+  async register(@Body() dto: RegisterDto, @Res() res: Response) {
+    const tokens = await this.authService.register(dto);
+    this.authService.setAuthCookies(res, tokens);
+    res.json({ accessToken: tokens.accessToken });
   }
 
-  @UseGuards(AtGuard)
+  @UseGuards(RtGuard)
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async logout(@User() user: JwtPayload) {
-    return this.authService.logout(user.sub);
+  async logout(@User() user: JwtRtPayload, @Res() res: Response) {
+    this.authService.clearAuthCookies(res);
+    await this.authService.logout(user.sub, user.deviceId);
+    res.send();
   }
 
   @UseGuards(RtGuard)
   @Post('refresh')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async refreshToken(@User() user: JwtRtPayload) {
-    return this.authService.refreshToken(user.sub, user.refreshToken);
+  @HttpCode(HttpStatus.OK)
+  @ApiResponse({ type: AtResponseDto })
+  async refreshToken(@User() user: JwtRtPayload, @Res() res: Response) {
+    const tokens = await this.authService.refreshToken(
+      user.sub,
+      user.refreshToken,
+      user.deviceId,
+      res,
+    );
+    this.authService.setAuthCookies(res, tokens);
+    res.json({ accessToken: tokens.accessToken });
+  }
+
+  @Roles(Role.Admin)
+  @Get('admin')
+  admin() {
+    return 'admin';
   }
 }

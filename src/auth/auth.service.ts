@@ -1,94 +1,130 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { AuthDto } from './dto';
-import * as bcrypt from 'bcrypt';
-import { JwtPayload, Tokens } from './types';
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+import { CookieOptions, Response } from 'express';
+import ms from 'ms';
+import { UsersService } from 'src/users/users.service';
+import { v4 as uuid } from 'uuid';
+import { LoginDto } from './dto';
+import { RegisterDto } from './dto/register.dto';
+import { JwtPayload, Tokens } from './types';
 
 @Injectable()
 export class AuthService {
+  private readonly cookieOptions: CookieOptions = {
+    httpOnly: true,
+    maxAge: ms('7d'),
+    sameSite: 'lax',
+  };
+
   constructor(
-    private prismaService: PrismaService,
+    private config: ConfigService,
+    private usersService: UsersService,
     private jwtService: JwtService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
-  async signUp(dto: AuthDto): Promise<Tokens> {
-    const hash = await this.hashData(dto.password);
-    const newUser = await this.prismaService.user.create({
-      data: {
-        email: dto.email,
-        hash: hash,
-      },
+  async register(dto: RegisterDto): Promise<Tokens> {
+    const user = await this.usersService.findUserByEmail(dto.email);
+    if (user) {
+      throw new BadRequestException('User with this email already exists');
+    }
+    const { password, ...userData } = dto;
+    const hash = await this.hashData(password);
+    const newUser = await this.usersService.create({
+      ...userData,
+      passwordHash: hash,
     });
-    const tokens = await this.getTokens(newUser.id, newUser.email);
-    await this.updateRtHash(newUser.id, tokens.refreshToken);
-    return tokens;
+    return this.getTokens(newUser.id, newUser.email, newUser.role);
   }
 
-  async signIn(dto: AuthDto): Promise<Tokens> {
-    const user = await this.prismaService.user.findUnique({
-      where: { email: dto.email },
-    });
+  async login(dto: LoginDto): Promise<Tokens> {
+    const user = await this.usersService.findUserByEmail(dto.email);
     if (!user) {
       throw new ForbiddenException('User with this email does not exist');
     }
-    const passwordMatch = await bcrypt.compare(dto.password, user.hash);
+    const passwordMatch = await bcrypt.compare(dto.password, user.passwordHash);
     if (!passwordMatch) {
       throw new ForbiddenException('Email for the user is invalid');
     }
-    const tokens = await this.getTokens(user.id, user.email);
-    await this.updateRtHash(user.id, tokens.refreshToken);
-    return tokens;
+    return this.getTokens(user.id, user.email, user.role);
   }
 
-  async logout(userId: number) {
-    await this.prismaService.user.updateMany({
-      where: {
-        id: userId,
-        hashedRt: { not: null },
-      },
-      data: { hashedRt: null },
-    });
+  async logout(userId: number, deviceId: string) {
+    console.log('key', `rt:${userId}:${deviceId}`);
+    await this.cacheManager.del(`rt:${userId}:${deviceId}`);
   }
 
-  async refreshToken(userId: number, rt: string) {
-    const user = await this.prismaService.user.findUnique({
-      where: { id: userId },
-    });
+  async refreshToken(
+    userId: number,
+    rt: string,
+    deviceId: string,
+    res: Response,
+  ) {
+    const user = await this.usersService.findUserById(userId);
     if (!user) {
+      await this.cacheManager.del(`rt:${userId}:${deviceId}`);
+      this.clearAuthCookies(res);
       throw new ForbiddenException('User with this id does not exist');
     }
-    const rtMatch = await bcrypt.compare(rt, user.hashedRt);
+    const hashedRt = await this.cacheManager.get<string>(
+      `rt:${userId}:${deviceId}`,
+    );
+    if (!hashedRt) {
+      this.clearAuthCookies(res);
+      throw new ForbiddenException('Refresh token is not valid');
+    }
+    const rtMatch = await bcrypt.compare(rt, hashedRt);
     if (!rtMatch) {
       throw new ForbiddenException('Refresh token is invalid');
     }
-    const tokens = await this.getTokens(user.id, user.email);
-    await this.updateRtHash(user.id, tokens.refreshToken);
-    return tokens;
+    return this.getTokens(user.id, user.email, user.role, deviceId);
   }
 
-  private async updateRtHash(userId: number, rt: string) {
-    const hash = await this.hashData(rt);
-    await this.prismaService.user.update({
-      where: { id: userId },
-      data: { hashedRt: hash },
-    });
+  setAuthCookies(res: Response, tokens: Tokens) {
+    res.cookie('refreshToken', tokens.refreshToken, this.cookieOptions);
+    res.cookie('deviceId', tokens.deviceId, this.cookieOptions);
   }
 
-  private async getTokens(userId: number, email: string): Promise<Tokens> {
-    const payload: JwtPayload = { sub: userId, email };
-    const [at, rt] = await Promise.all([
+  clearAuthCookies(res: Response) {
+    res.clearCookie('refreshToken', this.cookieOptions);
+    res.clearCookie('deviceId', this.cookieOptions);
+  }
+
+  private async updateRtHash(userId: number, rt: string, deviceId: string) {
+    const rtHash = await this.hashData(rt);
+    await this.cacheManager.set(`rt:${userId}:${deviceId}`, rtHash, ms('7d'));
+  }
+
+  private async getTokens(
+    userId: number,
+    email: string,
+    role: string,
+    deviceId?: string | undefined,
+  ): Promise<Tokens> {
+    const payload: JwtPayload = { sub: userId, email, role };
+    const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
-        secret: process.env.AT_SECRET,
+        secret: this.config.get<string>('AT_SECRET'),
         expiresIn: '15m',
       }),
       this.jwtService.signAsync(payload, {
-        secret: process.env.RT_SECRET,
-        expiresIn: '30d',
+        secret: this.config.get<string>('RT_SECRET'),
+        expiresIn: '7d',
       }),
     ]);
+    deviceId = deviceId || uuid();
 
-    return { accessToken: at, refreshToken: rt };
+    await this.updateRtHash(userId, refreshToken, deviceId);
+
+    return { accessToken, refreshToken, deviceId };
   }
 
   private hashData(data: string) {

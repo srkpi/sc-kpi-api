@@ -7,6 +7,7 @@ import { Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ApiKeyGuard } from './guards/api-key.guard';
 import { ConfigService } from '@nestjs/config';
+import cookieParser from 'cookie-parser';
 
 export function setup(app: INestApplication) {
   const configService = app.get(ConfigService);
@@ -21,6 +22,7 @@ export function setup(app: INestApplication) {
     .get<string>('ORIGINS')
     .split(',')
     .map((origin) => origin.trim());
+  app.use(cookieParser());
   app.enableCors({
     origin: origins,
     methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -40,6 +42,7 @@ export function setup(app: INestApplication) {
     .setVersion('1.0')
     .addApiKey({ type: 'apiKey', name: 'x-api-key', in: 'header' }, 'x-api-key')
     .addSecurityRequirements('x-api-key')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
