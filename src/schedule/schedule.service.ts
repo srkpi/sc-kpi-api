@@ -8,6 +8,7 @@ import { Weekdays } from './enums/weekdays.enum';
 import { SchedulePairDto } from './dto/schedule-pair.dto';
 import { HttpService } from '@nestjs/axios';
 import { ScheduleUtil } from './util/schedule.util';
+import { Courses } from './enums/courses.enum';
 
 @Injectable()
 export class ScheduleService {
@@ -148,7 +149,7 @@ export class ScheduleService {
     oauth2Client: OAuth2Client,
   ) {
     const { semester, semesterStart, semesterEnd } =
-      ScheduleUtil.getSemesterStart();
+      ScheduleUtil.getSemesterStart(Courses[scheduleDto.courseIdentifier]);
     const calendarData = await this.createCalendar(
       oauth2Client,
       scheduleDto.groupName,

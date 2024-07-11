@@ -42,12 +42,12 @@ export class ScheduleController {
         this.config.get<string>('FRONTEND_DEFAULT_SCHEDULE_URI'),
       );
     }
-    //properly handle code missing
+    //code missing
     if (!code) {
+      this.logger.error('Code from Google is missing');
       return res.redirect(
-        this.config.get<string>('FRONTEND_DEFAULT_SCHEDULE_URI'),
+        this.config.get<string>('FRONTEND_SERVER_ERROR_PAGE'),
       );
-      // return res.status(400).json({ message: 'Authorization code missing' });
     }
 
     try {
@@ -59,17 +59,13 @@ export class ScheduleController {
         maxAge: 900000, //15 minutes
       });
 
-      // question about data transfer
       return res.redirect(this.config.get<string>('FRONTEND_IMPORT_PAGE_URI'));
     } catch (error) {
-      //handle redirect
+      //server error
       this.logger.error('Error during token exchange: ', error);
       return res.redirect(
-        this.config.get<string>('FRONTEND_DEFAULT_SCHEDULE_URI'),
+        this.config.get<string>('FRONTEND_SERVER_ERROR_PAGE'),
       );
-      // return res
-      //   .status(500)
-      //   .json({ message: 'Error during token exchange', error: error.message });
     }
   }
 

@@ -1,5 +1,7 @@
+import { Courses } from '../enums/courses.enum';
+
 export class ScheduleUtil {
-  static getSemesterStart() {
+  static getSemesterStart(courseIdentifier: Courses) {
     const currentDate = new Date();
     const kyivFormatter = new Intl.DateTimeFormat('en-US', {
       timeZone: 'Europe/Kyiv',
@@ -37,6 +39,16 @@ export class ScheduleUtil {
       } while (semesterStartFirst.getDay() !== 1);
     }
 
+    if (courseIdentifier === Courses['6 курс ОНП']) {
+      return {
+        semester: 1,
+        semesterStart: semesterStartFirst,
+        semesterEnd: new Date(semesterStartFirst).setDate(
+          semesterStartFirst.getDate() + 18 * 7,
+        ),
+      };
+    }
+
     const scheduleStartSecond = new Date(semesterStartFirst);
     scheduleStartSecond.setDate(scheduleStartSecond.getDate() + 22 * 7 - 1);
     const semesterStartSecond = new Date(semesterStartFirst);
@@ -48,7 +60,10 @@ export class ScheduleUtil {
     const semesterEnd = new Date(
       semester === 1 ? semesterStartFirst : semesterStartSecond,
     );
-    semesterEnd.setDate(semesterEnd.getDate() + 18 * 7);
+    semesterEnd.setDate(
+      semesterEnd.getDate() +
+        (courseIdentifier !== Courses['4 курс'] ? 18 : 9) * 7,
+    );
 
     return {
       semester,
