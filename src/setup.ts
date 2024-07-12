@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import cookieParser from 'cookie-parser';
 import { ApiKeyGuard } from './guards/api-key.guard';
 import { ConfigService } from '@nestjs/config';
 
@@ -17,6 +18,7 @@ export function setup(app: INestApplication) {
     }),
   );
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+  app.use(cookieParser());
   const origins = configService
     .get<string>('ORIGINS')
     .split(',')
@@ -32,6 +34,7 @@ export function setup(app: INestApplication) {
       'X-Requested-With',
       'x-api-key',
     ],
+    credentials: true,
   });
   app.useGlobalGuards(new ApiKeyGuard(configService));
   const config = new DocumentBuilder()
