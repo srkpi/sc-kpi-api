@@ -38,16 +38,12 @@ export class ScheduleController {
   ) {
     if (error) {
       //Authorization denied
-      return res.redirect(
-        this.config.get<string>('FRONTEND_DEFAULT_SCHEDULE_URI'),
-      );
+      return res.redirect(this.config.get<string>('FRONTEND_HOME_URI'));
     }
     //code missing
     if (!code) {
       this.logger.error('Code from Google is missing');
-      return res.redirect(
-        this.config.get<string>('FRONTEND_SERVER_ERROR_PAGE'),
-      );
+      return res.redirect(this.config.get<string>('FRONTEND_IMPORT_PAGE_URI'));
     }
 
     try {
@@ -63,9 +59,7 @@ export class ScheduleController {
     } catch (error) {
       //server error
       this.logger.error('Error during token exchange: ', error);
-      return res.redirect(
-        this.config.get<string>('FRONTEND_SERVER_ERROR_PAGE'),
-      );
+      return res.redirect(this.config.get<string>('FRONTEND_IMPORT_PAGE_URI'));
     }
   }
 
