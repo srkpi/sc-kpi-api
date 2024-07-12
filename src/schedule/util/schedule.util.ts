@@ -1,7 +1,7 @@
 import { Courses } from '../enums/courses.enum';
 
 export class ScheduleUtil {
-  static getSemesterStart(courseIdentifier: Courses) {
+  static getSemesterStart(courseIdentifier: number) {
     const currentDate = new Date();
     const kyivFormatter = new Intl.DateTimeFormat('en-US', {
       timeZone: 'Europe/Kyiv',

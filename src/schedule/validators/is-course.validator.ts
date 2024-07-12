@@ -4,6 +4,7 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator';
 import { Courses } from '../enums/courses.enum';
+import { Weekdays } from '../enums/weekdays.enum';
 
 @ValidatorConstraint({ name: 'isCourse', async: false })
 export class IsCourseValidator implements ValidatorConstraintInterface {

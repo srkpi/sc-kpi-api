@@ -15,6 +15,7 @@ export class CreateScheduleDto {
   @IsNotEmpty()
   groupName: string;
 
+  @IsString()
   @IsCourse()
   courseIdentifier: string;
 
