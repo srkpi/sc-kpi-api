@@ -9,6 +9,7 @@ import { SchedulePairDto } from './dto/schedule-pair.dto';
 import { HttpService } from '@nestjs/axios';
 import { ScheduleUtil } from './util/schedule.util';
 import { Courses } from './enums/courses.enum';
+import ms from 'ms';
 
 @Injectable()
 export class ScheduleService {
@@ -39,7 +40,7 @@ export class ScheduleService {
   async getUserTokens(code: string) {
     const oauth2Client = this.createOAuth2Client();
     const { tokens } = await oauth2Client.getToken(code);
-    tokens.expiry_date = Date.now() + 15 * 60 * 1000;
+    tokens.expiry_date = Date.now() + ms('15m');
     return tokens;
   }
 
@@ -168,7 +169,6 @@ export class ScheduleService {
       for (const [dayIndex, dayData] of weekData.entries()) {
         const dayDate = new Date(startWeekDate);
         dayDate.setDate(dayDate.getDate() + dayIndex);
-        const currentDay = Weekdays[dayData.day];
         for (const pair of dayData.pairs) {
           const time = pair.time.split('.').map((value) => parseInt(value));
           const [hours, minutes] = time;

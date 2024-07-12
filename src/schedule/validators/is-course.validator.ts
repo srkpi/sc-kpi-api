@@ -12,6 +12,6 @@ export class IsCourseValidator implements ValidatorConstraintInterface {
   }
 
   defaultMessage(): string {
-    return 'The value must be a valid course identifier';
+    return 'The value must be a valid course identifier: 1-3, 5 курси; 4 курс; 6 курс ОНП';
   }
 }

@@ -13,6 +13,7 @@ import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response, Request } from 'express';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { ConfigService } from '@nestjs/config';
+import ms from 'ms';
 
 @ApiTags('schedule')
 @Controller('schedule')
@@ -52,7 +53,7 @@ export class ScheduleController {
       res.cookie('tokens', JSON.stringify(tokens), {
         httpOnly: true,
         sameSite: 'strict',
-        maxAge: 900000, //15 minutes
+        maxAge: ms('15m'),
       });
 
       return res.redirect(this.config.get<string>('FRONTEND_IMPORT_PAGE_URI'));
@@ -79,7 +80,7 @@ export class ScheduleController {
     res.clearCookie('tokens', {
       httpOnly: true,
       sameSite: 'strict',
-      maxAge: 900000, //15 minutes
+      maxAge: ms('15m'),
     });
 
     if (!tokensString) {
