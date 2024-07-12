@@ -8,7 +8,7 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "sleep 3 && yarn workspaces focus --production && yarn prisma migrate deploy && yarn run build && yarn run start:prod",
+    "start": "sleep 3 && yarn prisma migrate deploy && yarn run build && yarn run start:prod",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node --max-old-space-size=4096 dist/main",
