@@ -6,10 +6,9 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build-tsc": "tsc -p tsconfig.build.json",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "sleep 3 && yarn prisma migrate deploy && yarn run build-tsc && yarn run start:prod",
+    "start": "sleep 3 && yarn prisma migrate deploy && yarn run build",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
