@@ -13,6 +13,9 @@ import { UsersModule } from './users/users.module';
 import { AppService } from './app.service';
 import { APP_GUARD } from '@nestjs/core';
 import { AtGuard, RolesGuard } from './auth/guards';
+import { MailModule } from './mail/mail.module';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
 
 @Module({
   imports: [
@@ -25,6 +28,14 @@ import { AtGuard, RolesGuard } from './auth/guards';
     DepartmentsModule,
     AuthModule,
     UsersModule,
+    MailModule,
+    ThrottlerModule.forRoot({
+      throttlers: [
+        { name: 'short', ttl: 60, limit: 10 },
+        { name: 'medium', ttl: 60, limit: 10 },
+      ],
+      storage: new ThrottlerStorageRedisService(process.env.REDIS_URL),
+    }),
   ],
   controllers: [AppController],
   providers: [

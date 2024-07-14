@@ -1,35 +1,40 @@
+import { InjectQueue } from '@nestjs/bull';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import {
   BadRequestException,
   ForbiddenException,
   Inject,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { Queue } from 'bull';
 import { CookieOptions, Response } from 'express';
 import ms from 'ms';
+import { MailService } from 'src/mail/mail.service';
 import { UsersService } from 'src/users/users.service';
 import { v4 as uuid } from 'uuid';
-import { LoginDto } from './dto';
+import { LoginDto, ResetPasswordDto, UpdatePasswordDto } from './dto';
 import { RegisterDto } from './dto/register.dto';
 import { JwtPayload, Tokens } from './types';
-import nodemailer from 'nodemailer';
 
 @Injectable()
 export class AuthService {
   private readonly cookieOptions: CookieOptions = {
     httpOnly: true,
     maxAge: ms('7d'),
-    sameSite: 'lax',
+    sameSite: 'strict',
   };
 
   constructor(
     private config: ConfigService,
     private usersService: UsersService,
     private jwtService: JwtService,
+    private mailService: MailService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    @InjectQueue('recovery-queue') private recoveryQueue: Queue,
   ) {}
 
   async register(dto: RegisterDto): Promise<Tokens> {
@@ -59,7 +64,6 @@ export class AuthService {
   }
 
   async logout(userId: number, deviceId: string) {
-    console.log('key', `rt:${userId}:${deviceId}`);
     await this.cacheManager.del(`rt:${userId}:${deviceId}`);
   }
 
@@ -99,27 +103,58 @@ export class AuthService {
     res.clearCookie('deviceId', this.cookieOptions);
   }
 
-  async updatePassword(email: string) {
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: this.config.get<string>('EMAIL_USERNAME'),
-        pass: this.config.get<string>('EMAIL_PASSWORD'),
-      },
-    });
+  async updatePassword(dto: UpdatePasswordDto, userId: number, res: Response) {
+    const user = await this.usersService.findUserById(userId);
+    const isPasswordValid = await bcrypt.compare(
+      dto.oldPassword,
+      user.passwordHash,
+    );
+    if (!isPasswordValid) {
+      throw new ForbiddenException('Old password is invalid');
+    }
+    if (dto.oldPassword === dto.newPassword) {
+      throw new BadRequestException('New password should be different');
+    }
+    await this.changePassword(userId, dto.newPassword);
 
-    const resetLink =
-      this.config.get<string>('API_URL') + `/auth/reset-password?token=1111`;
+    const tokens = await this.getTokens(userId, user.email, user.role);
+    this.setAuthCookies(res, tokens);
+  }
 
-    await transporter.sendMail({
-      from: '"SR KPI administration" <srkpinotification@gmail.com>',
-      to: email,
-      subject: 'Password reset request',
-      html: `
-      <p>Please click on the following link to reset your password: <a href="${resetLink}">${resetLink}</a></p>
-      <p>If you did not request a password reset, please ignore this message. It's possible that another user entered your email address by mistake. No changes have been made to your account.</p>
-      `,
-    });
+  async requestRecovery(email: string) {
+    const user = await this.usersService.findUserByEmail(email);
+    if (!user) {
+      throw new ForbiddenException('User with this email does not exist');
+    }
+    const job = await this.recoveryQueue.add({ email }, { removeOnFail: true });
+    await job.finished();
+    const token = uuid();
+    await this.cacheManager.set(token, email, ms('15m'));
+    await this.mailService.sendPasswordRecoveryEmail(email, token);
+  }
+
+  async getResetPage(token: string, res: Response) {
+    res.redirect(`${this.config.get<string>('CLIENT_URL')}?token=${token}`);
+  }
+
+  async resetPassword(dto: ResetPasswordDto) {
+    const { token, newPassword } = dto;
+    const email = await this.cacheManager.get<string>(token);
+    if (!email) {
+      throw new NotFoundException('Time is up. Please try again');
+    }
+    const user = await this.usersService.findUserByEmail(email);
+    await this.changePassword(user.id, newPassword);
+    await this.cacheManager.del(token);
+  }
+
+  private async changePassword(userId: number, newPassword: string) {
+    const cacheKeys = await this.cacheManager.store.keys(`rt:${userId}:*`);
+    for (const key of cacheKeys) {
+      await this.cacheManager.del(key);
+    }
+    const hash = await this.hashData(newPassword);
+    await this.usersService.updatePassword(userId, hash);
   }
 
   private async updateRtHash(userId: number, rt: string, deviceId: string) {

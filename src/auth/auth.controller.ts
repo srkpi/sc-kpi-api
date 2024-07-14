@@ -5,16 +5,29 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Put,
+  Query,
   Res,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { Response } from 'express';
+import ms from 'ms';
 import { AuthService } from './auth.service';
 import { Public, User } from './decorators';
-import { LoginDto, RegisterDto } from './dto';
-import { AtResponseDto } from './dto/at-response.dto';
-import { RtGuard } from './guards';
+import {
+  AtResponseDto,
+  LoginDto,
+  PasswordRecoveryDto,
+  RecoveryDto,
+  RegisterDto,
+  ResetPasswordDto,
+  UpdatePasswordDto,
+} from './dto';
+import { RecoveryThrottlerGuard, RtGuard } from './guards';
+import { BlockCheckInterceptor } from './interceptors/block-check.interceptor';
 import { JwtRtPayload } from './types';
 
 @ApiTags('auth')
@@ -66,10 +79,50 @@ export class AuthController {
     res.json({ accessToken: tokens.accessToken });
   }
 
+  @UseGuards(RtGuard)
+  @Put('password')
+  @HttpCode(HttpStatus.OK)
+  async updatePassword(
+    @Body() dto: UpdatePasswordDto,
+    @User('sub') userId: number,
+    @Res() res: Response,
+  ) {
+    const response = await this.authService.updatePassword(dto, userId, res);
+    res.send(response);
+  }
+
   @Public()
-  @Get('email')
-  async email() {
-    await this.authService.updatePassword('ole9zp@gmail.com');
-    return 'ok';
+  @UseInterceptors(BlockCheckInterceptor)
+  @UseGuards(RecoveryThrottlerGuard)
+  @Throttle({
+    short: { limit: 1, ttl: ms('15m') },
+    medium: { limit: 5, ttl: ms('2h') },
+  })
+  @Post('recovery')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async requestRecovery(
+    @Body() dto: PasswordRecoveryDto,
+    @Res() res: Response,
+  ) {
+    try {
+      await this.authService.requestRecovery(dto.email);
+      res.status(HttpStatus.NO_CONTENT).send();
+    } catch (error) {
+      res.status(HttpStatus.TOO_MANY_REQUESTS).send();
+    }
+  }
+
+  @Public()
+  @Get('reset-password')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async getResetPage(@Query() query: RecoveryDto, @Res() res: Response) {
+    await this.authService.getResetPage(query.token, res);
+  }
+
+  @Public()
+  @Put('reset-password')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    await this.authService.resetPassword(dto);
   }
 }
