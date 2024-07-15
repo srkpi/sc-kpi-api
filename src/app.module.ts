@@ -8,6 +8,7 @@ import { DepartmentsModule } from './departments/departments.module';
 import { FaqModule } from './faq/faq.module';
 import { GreetingsModule } from './greetings/greetings.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { ScheduleModule } from './schedule/schedule.module';
 import { RedisOptions } from './redis/redis-options';
 import { UsersModule } from './users/users.module';
 import { AppService } from './app.service';
@@ -25,6 +26,7 @@ import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
     PrismaModule,
     FaqModule,
     ClubsModule,
+    ScheduleModule,
     DepartmentsModule,
     AuthModule,
     UsersModule,
