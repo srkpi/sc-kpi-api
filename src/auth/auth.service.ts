@@ -134,7 +134,9 @@ export class AuthService {
   }
 
   async getResetPage(token: string, res: Response) {
-    res.redirect(`${this.config.get<string>('CLIENT_URL')}?token=${token}`);
+    res.redirect(
+      `${this.config.get<string>('FRONTEND_HOME_URI')}?token=${token}`,
+    );
   }
 
   async resetPassword(dto: ResetPasswordDto) {
@@ -172,7 +174,7 @@ export class AuthService {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
         secret: this.config.get<string>('AT_SECRET'),
-        expiresIn: '15m',
+        expiresIn: '3m',
       }),
       this.jwtService.signAsync(payload, {
         secret: this.config.get<string>('RT_SECRET'),

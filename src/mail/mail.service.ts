@@ -18,7 +18,7 @@ export class MailService {
   }
 
   async sendPasswordRecoveryEmail(email: string, token: string) {
-    const client = this.config.get<string>('CLIENT_URL');
+    const client = this.config.get<string>('FRONTEND_HOME_URI');
     const htmlContent = this.readHtmlFile('reset-password.html').replace(
       '{{resetLink}}',
       `${client}/reset-password/${token}`,
