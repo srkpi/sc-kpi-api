@@ -10,6 +10,7 @@ export const RedisOptions: CacheModuleAsyncOptions = {
       socket: {
         host: configService.get<string>('REDIS_HOST'),
         port: parseInt(configService.get<string>('REDIS_PORT')!),
+        passphrase: configService.get<string>('REDIS_PASSWORD'),
       },
     });
     return {
