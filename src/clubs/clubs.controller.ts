@@ -16,8 +16,11 @@ import { ClubIdDto } from './dto/club-id.dto';
 import { CreateClubDto } from './dto/create-club.dto';
 import { ReadClubDto } from './dto/read-club.dto';
 import { UpdateClubDto } from './dto/update-club.dto';
+import { Public, Roles } from 'src/auth/decorators';
+import { Role } from 'src/auth/types';
 
 @ApiTags('clubs')
+@Roles(Role.Admin)
 @Controller('clubs')
 export class ClubsController {
   constructor(private readonly clubsService: ClubsService) {}
@@ -31,6 +34,7 @@ export class ClubsController {
   }
 
   @Get()
+  @Public()
   @ApiResponse({ status: 200, type: [ReadClubDto] })
   async findAll(): Promise<ReadClubDto[]> {
     const res = await this.clubsService.findAll();
@@ -38,6 +42,7 @@ export class ClubsController {
   }
 
   @Get(':clubId')
+  @Public()
   @ApiResponse({ status: 200, type: ReadClubDto })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 404, description: 'Club not found' })

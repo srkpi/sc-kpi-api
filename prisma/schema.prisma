@@ -7,6 +7,26 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id        Int      @id() @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  email        String  @unique
+  firstName    String
+  lastName     String
+  middleName   String?
+  faculty      String
+  group        String
+  passwordHash String
+  role         Role    @default(user)
+}
+
+enum Role {
+  user
+  admin
+}
+
 model Greeting {
   id       Int    @id() @default(autoincrement())
   greeting String

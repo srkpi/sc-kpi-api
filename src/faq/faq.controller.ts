@@ -16,8 +16,11 @@ import { FaqIdDto } from './dto/faq-id.dto';
 import { ReadFaqDto } from './dto/read-faq.dto';
 import { UpdateFaqDto } from './dto/update-faq.dto';
 import { FaqService } from './faq.service';
+import { Public, Roles } from 'src/auth/decorators';
+import { Role } from 'src/auth/types';
 
 @ApiTags('faq')
+@Roles(Role.Admin)
 @Controller('faq')
 export class FaqController {
   constructor(private readonly faqService: FaqService) {}
@@ -31,12 +34,14 @@ export class FaqController {
   }
 
   @Get()
+  @Public()
   async findAll(): Promise<ReadFaqDto[]> {
     const res = await this.faqService.findAll();
     return plainToInstance(ReadFaqDto, res);
   }
 
   @Get(':id')
+  @Public()
   @ApiResponse({ status: 200, type: ReadFaqDto })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 404, description: 'FAQ not found' })

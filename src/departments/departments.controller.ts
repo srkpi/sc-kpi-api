@@ -16,8 +16,11 @@ import { CreateDepartmentDto } from './dto/create-department.dto';
 import { DepartmentIdDto } from './dto/department-id.dto';
 import { ReadDepartmentDto } from './dto/read-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
+import { Public, Roles } from 'src/auth/decorators';
+import { Role } from 'src/auth/types';
 
 @ApiTags('departments')
+@Roles(Role.Admin)
 @Controller('departments')
 export class DepartmentsController {
   constructor(private readonly departmentsService: DepartmentsService) {}
@@ -33,6 +36,7 @@ export class DepartmentsController {
   }
 
   @Get()
+  @Public()
   @ApiResponse({ status: 200, type: [ReadDepartmentDto] })
   async findAll(): Promise<ReadDepartmentDto[]> {
     const res = await this.departmentsService.findAll();
@@ -40,6 +44,7 @@ export class DepartmentsController {
   }
 
   @Get(':departmentId')
+  @Public()
   @ApiResponse({ status: 200, type: ReadDepartmentDto })
   @ApiResponse({ status: 400, description: 'Bad request' })
   @ApiResponse({ status: 404, description: 'Department not found' })
