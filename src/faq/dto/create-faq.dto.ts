@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsInt, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateFaqDto {
   @IsString()
@@ -9,7 +9,7 @@ export class CreateFaqDto {
   @IsNotEmpty()
   answer: string;
 
-  @IsString()
   @IsOptional()
-  category: string | null;
+  @IsInt()
+  categoryId: number | null;
 }

@@ -34,10 +34,17 @@ model Greeting {
 }
 
 model Faq {
-  id       Int     @id() @default(autoincrement())
-  question String
-  answer   String
-  category String?
+  id         Int          @id() @default(autoincrement())
+  question   String
+  answer     String
+  category   FaqCategory? @relation(fields: [categoryId], references: [id])
+  categoryId Int?
+}
+
+model FaqCategory {
+  id   Int    @id() @default(autoincrement())
+  name String
+  Faq  Faq[]
 }
 
 model Club {

@@ -1,4 +1,5 @@
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
+import { ReadCategoryDto } from '../categories/dto/read-category.dto';
 
 export class ReadFaqDto {
   @Expose()
@@ -11,5 +12,9 @@ export class ReadFaqDto {
   answer: string;
 
   @Expose()
-  category: string | null;
+  categoryId: number | null;
+
+  @Expose()
+  @Type(() => ReadCategoryDto)
+  category: ReadCategoryDto | null;
 }

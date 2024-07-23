@@ -40,7 +40,7 @@ export class FaqController {
     return plainToInstance(ReadFaqDto, res);
   }
 
-  @Get(':id')
+  @Get(':id(\\d+)')
   @Public()
   @ApiResponse({ status: 200, type: ReadFaqDto })
   @ApiResponse({ status: 400, description: 'Bad request' })

@@ -25,7 +25,8 @@ export class AuthService {
   private readonly cookieOptions: CookieOptions = {
     httpOnly: true,
     maxAge: ms('7d'),
-    sameSite: 'strict',
+    sameSite: 'none',
+    secure: true,
   };
 
   constructor(
