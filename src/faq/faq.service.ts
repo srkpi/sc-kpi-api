@@ -8,17 +8,30 @@ export class FaqService {
   constructor(private prismaService: PrismaService) {}
 
   async create(createFaqDto: CreateFaqDto) {
+    const { categoryId, ...faqDto } = createFaqDto;
+    const category = await this.prismaService.faqCategory.findFirst({
+      where: { id: categoryId },
+    });
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
     return await this.prismaService.faq.create({
-      data: { ...createFaqDto },
+      data: { ...faqDto, category: { connect: { id: categoryId } } },
+      include: { category: true },
     });
   }
 
   async findAll() {
-    return await this.prismaService.faq.findMany();
+    return await this.prismaService.faq.findMany({
+      include: { category: true },
+    });
   }
 
   async findOne(id: number) {
-    const faq = await this.prismaService.faq.findFirst({ where: { id } });
+    const faq = await this.prismaService.faq.findFirst({
+      where: { id },
+      include: { category: true },
+    });
     if (!faq) {
       throw new NotFoundException('FAQ not found');
     }
@@ -30,6 +43,7 @@ export class FaqService {
       return await this.prismaService.faq.update({
         where: { id: updateFaqDto.id },
         data: { ...updateFaqDto },
+        include: { category: true },
       });
     } catch {
       throw new NotFoundException('FAQ with this ID does not exist');
@@ -40,6 +54,7 @@ export class FaqService {
     try {
       await this.prismaService.faq.delete({
         where: { id },
+        include: { category: true },
       });
     } catch {
       throw new NotFoundException('FAQ with this ID does not exist');

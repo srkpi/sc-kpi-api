@@ -55,6 +55,7 @@ export class AuthController {
     res.json({ accessToken: tokens.accessToken });
   }
 
+  @Public()
   @UseGuards(RtGuard)
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -64,6 +65,7 @@ export class AuthController {
     res.send();
   }
 
+  @Public()
   @UseGuards(RtGuard)
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
