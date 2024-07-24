@@ -2,14 +2,29 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
+import { ImgurService } from '../../imgur/imgur.service';
+import { DepartmentProject } from '@prisma/client';
 
 @Injectable()
 export class ProjectsService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private readonly imgurService: ImgurService,
+  ) {}
 
-  async create(createProjectDto: CreateProjectDto) {
+  async create(createProjectDto: CreateProjectDto, image: string) {
+    const { name, description } = createProjectDto;
+    const imageData = await this.imgurService.uploadImage(
+      image,
+      name,
+      description,
+    );
     return this.prismaService.departmentProject.create({
-      data: createProjectDto,
+      data: {
+        ...createProjectDto,
+        image: imageData.url,
+        imageDeleteHash: imageData.deleteHash,
+      },
     });
   }
 
@@ -41,10 +56,14 @@ export class ProjectsService {
   }
 
   async remove(id: number) {
+    let removedProject: DepartmentProject;
     try {
-      await this.prismaService.departmentProject.delete({ where: { id } });
+      removedProject = await this.prismaService.departmentProject.delete({
+        where: { id },
+      });
     } catch {
       throw new NotFoundException('Project with this ID does not exist');
     }
+    await this.imgurService.deleteImage(removedProject.imageDeleteHash);
   }
 }

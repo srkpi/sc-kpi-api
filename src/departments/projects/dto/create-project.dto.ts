@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsString, IsUrl } from 'class-validator';
+import { IsInt, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateProjectDto {
   @IsNotEmpty()
@@ -12,8 +12,4 @@ export class CreateProjectDto {
   @IsNotEmpty()
   @IsString()
   description: string;
-
-  @IsNotEmpty()
-  @IsUrl()
-  image: string;
 }

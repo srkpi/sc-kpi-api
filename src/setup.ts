@@ -23,7 +23,6 @@ export function setup(app: INestApplication) {
     .get<string>('ORIGINS')
     .split(',')
     .map((origin) => origin.trim());
-  app.use(cookieParser());
   app.enableCors({
     origin: origins,
     methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

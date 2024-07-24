@@ -2,19 +2,28 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { ImgurService } from '../imgur/imgur.service';
 
 @Injectable()
 export class DepartmentsService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private readonly imgurService: ImgurService,
+  ) {}
 
-  async create(createDepartmentDto: CreateDepartmentDto) {
-    const { projects, ...data } = createDepartmentDto;
+  async create(createDepartmentDto: CreateDepartmentDto, image: string) {
+    const { name, shortDescription } = createDepartmentDto;
+    const imageData = await this.imgurService.uploadImage(
+      image,
+      name,
+      shortDescription,
+    );
     return this.prismaService.department.create({
       data: {
-        ...data,
-        projects: { createMany: { data: projects ?? [] } },
+        ...createDepartmentDto,
+        image: imageData.url,
+        imageDeleteHash: imageData.deleteHash,
       },
-      include: { projects: true },
     });
   }
 
@@ -49,7 +58,10 @@ export class DepartmentsService {
 
   async remove(id: number) {
     try {
-      await this.prismaService.department.delete({ where: { id } });
+      const removedDepartment = await this.prismaService.department.delete({
+        where: { id },
+      });
+      await this.imgurService.deleteImage(removedDepartment.imageDeleteHash);
     } catch {
       throw new NotFoundException('Department with this ID does not exist');
     }

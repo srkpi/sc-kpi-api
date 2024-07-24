@@ -48,12 +48,13 @@ model Club {
 }
 
 model ClubProject {
-  id          Int    @id() @default(autoincrement())
-  name        String
-  description String
-  club        Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
-  clubId      Int
-  image       String
+  id              Int    @id() @default(autoincrement())
+  name            String
+  description     String
+  club            Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  clubId          Int
+  image           String
+  imageDeleteHash String
 }
 
 model Department {
@@ -62,15 +63,17 @@ model Department {
   description      String
   shortDescription String
   image            String
+  imageDeleteHash  String
   buttonLink       String
   projects         DepartmentProject[]
 }
 
 model DepartmentProject {
-  id           Int        @id() @default(autoincrement())
-  name         String
-  description  String
-  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
-  departmentId Int
-  image        String
+  id              Int        @id() @default(autoincrement())
+  name            String
+  description     String
+  department      Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  departmentId    Int
+  image           String
+  imageDeleteHash String
 }
