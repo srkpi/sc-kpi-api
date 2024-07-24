@@ -8,22 +8,18 @@ export class ClubsService {
   constructor(private prisma: PrismaService) {}
 
   async create(createClubDto: CreateClubDto) {
-    const createdClub = await this.prisma.club.create({
+    return this.prisma.club.create({
       data: {
         name: createClubDto.name,
         description: createClubDto.description,
-        projects: { createMany: { data: createClubDto.projects ?? [] } },
       },
-      include: { projects: true },
     });
-    return createdClub;
   }
 
   async findAll() {
-    const clubs = await this.prisma.club.findMany({
+    return this.prisma.club.findMany({
       include: { projects: true },
     });
-    return clubs;
   }
 
   async findOne(id: number) {
@@ -39,7 +35,7 @@ export class ClubsService {
 
   async update(updateClubDto: UpdateClubDto) {
     try {
-      const updatedClub = await this.prisma.club.update({
+      return await this.prisma.club.update({
         where: { id: updateClubDto.id },
         data: {
           name: updateClubDto.name,
@@ -47,7 +43,6 @@ export class ClubsService {
         },
         include: { projects: true },
       });
-      return updatedClub;
     } catch {
       throw new NotFoundException('Club with this ID does not exist');
     }

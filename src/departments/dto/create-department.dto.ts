@@ -1,10 +1,4 @@
-import {
-  IsArray,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsUrl,
-} from 'class-validator';
+import { IsNotEmpty, IsString, IsUrl } from 'class-validator';
 
 export class CreateDepartmentDto {
   @IsNotEmpty()
@@ -21,27 +15,5 @@ export class CreateDepartmentDto {
 
   @IsNotEmpty()
   @IsUrl()
-  image: string;
-
-  @IsNotEmpty()
-  @IsUrl()
   buttonLink: string;
-
-  @IsOptional()
-  @IsArray()
-  projects: CreateDepartmentProjectDto[];
-}
-
-class CreateDepartmentProjectDto {
-  @IsNotEmpty()
-  @IsString()
-  name: string;
-
-  @IsNotEmpty()
-  @IsString()
-  description: string;
-
-  @IsNotEmpty()
-  @IsUrl()
-  image: string;
 }
