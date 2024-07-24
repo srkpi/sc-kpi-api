@@ -24,7 +24,7 @@ import { JwtPayload, Tokens } from './types';
 export class AuthService {
   private readonly cookieOptions: CookieOptions = {
     httpOnly: true,
-    maxAge: ms('7d'),
+    maxAge: 7 * 24 * 60 * 60 * 1000,
     sameSite: 'lax',
     secure: true,
   };
