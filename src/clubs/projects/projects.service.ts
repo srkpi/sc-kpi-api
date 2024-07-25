@@ -53,6 +53,29 @@ export class ProjectsService {
     }
   }
 
+  async updateImage(newImage: string, id: number) {
+    const project = await this.prismaService.clubProject.findUnique({
+      where: { id },
+    });
+    if (!project) {
+      throw new NotFoundException('Project with this ID does not exist');
+    }
+    await this.imgurService.deleteImage(project.imageDeleteHash);
+    const imageData = await this.imgurService.uploadImage(
+      newImage,
+      project.name,
+      project.description,
+    );
+    const data = {
+      image: imageData.url,
+      imageDeleteHash: imageData.deleteHash,
+    };
+    return this.prismaService.clubProject.update({
+      where: { id },
+      data,
+    });
+  }
+
   async remove(id: number) {
     let removedProject: ClubProject;
     try {

@@ -114,6 +114,37 @@ export class DepartmentsController {
     return plainToInstance(ReadDepartmentDto, res);
   }
 
+  @Patch('/image/:departmentId')
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiResponse({ status: 200, type: ReadDepartmentDto })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({
+    status: 404,
+    description: 'Department with this ID does not exist',
+  })
+  async updateImage(
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: convert(25, 'MiB').to('B') }),
+          new FileTypeValidator({ fileType: '.(png|jpg|jpeg)' }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+    @Param() dto: DepartmentIdDto,
+  ): Promise<ReadDepartmentDto> {
+    if (!file) {
+      throw new BadRequestException('No picture uploaded');
+    }
+    const image = file.buffer.toString('base64');
+    const res = await this.departmentsService.updateImage(
+      image,
+      dto.departmentId,
+    );
+    return plainToInstance(ReadDepartmentDto, res);
+  }
+
   @Delete(':departmentId')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiResponse({ status: 204, description: 'Department deleted successfully' })

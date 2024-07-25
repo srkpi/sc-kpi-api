@@ -56,6 +56,29 @@ export class DepartmentsService {
     }
   }
 
+  async updateImage(newImage: string, id: number) {
+    const department = await this.prismaService.department.findUnique({
+      where: { id },
+    });
+    if (!department) {
+      throw new NotFoundException('Department with this ID does not exist');
+    }
+    await this.imgurService.deleteImage(department.imageDeleteHash);
+    const imageData = await this.imgurService.uploadImage(
+      newImage,
+      department.name,
+      department.shortDescription,
+    );
+    const data = {
+      image: imageData.url,
+      imageDeleteHash: imageData.deleteHash,
+    };
+    return this.prismaService.department.update({
+      where: { id },
+      data,
+    });
+  }
+
   async remove(id: number) {
     try {
       const removedDepartment = await this.prismaService.department.delete({
