@@ -45,6 +45,7 @@ export class ImgurService {
   }
 
   async deleteImage(deleteHash: string) {
+    if (!deleteHash) return;
     try {
       await axios.delete(`https://api.imgur.com/3/image/${deleteHash}`, {
         headers: {

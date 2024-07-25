@@ -61,7 +61,7 @@ model ClubProject {
   club            Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
   clubId          Int
   image           String
-  imageDeleteHash String
+  imageDeleteHash String @default("")
 }
 
 model Department {
@@ -70,7 +70,7 @@ model Department {
   description      String
   shortDescription String
   image            String
-  imageDeleteHash  String
+  imageDeleteHash  String              @default("")
   buttonLink       String
   projects         DepartmentProject[]
 }
@@ -82,5 +82,5 @@ model DepartmentProject {
   department      Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
   departmentId    Int
   image           String
-  imageDeleteHash String
+  imageDeleteHash String     @default("")
 }
