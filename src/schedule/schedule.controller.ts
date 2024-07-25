@@ -52,7 +52,7 @@ export class ScheduleController {
 
       res.cookie('tokens', JSON.stringify(tokens), {
         httpOnly: true,
-        sameSite: 'strict',
+        sameSite: 'none',
         maxAge: ms('15m'),
       });
 
@@ -79,7 +79,7 @@ export class ScheduleController {
     const tokensString = req.cookies['tokens'];
     res.clearCookie('tokens', {
       httpOnly: true,
-      sameSite: 'strict',
+      sameSite: 'none',
       maxAge: ms('15m'),
     });
 
