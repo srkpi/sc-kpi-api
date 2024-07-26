@@ -93,6 +93,34 @@ export class ProjectsController {
     return plainToInstance(ReadProjectDto, res);
   }
 
+  @Patch('/image/:projectId')
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiResponse({ status: 200, type: ReadProjectDto })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({
+    status: 404,
+    description: 'Project with this ID does not exist',
+  })
+  async updateImage(
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: convert(25, 'MiB').to('B') }),
+          new FileTypeValidator({ fileType: '.(png|jpg|jpeg)' }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
+    @Param() dto: ProjectIdDto,
+  ): Promise<ReadProjectDto> {
+    if (!file) {
+      throw new BadRequestException('No picture uploaded');
+    }
+    const image = file.buffer.toString('base64');
+    const res = await this.projectsService.updateImage(image, dto.projectId);
+    return plainToInstance(ReadProjectDto, res);
+  }
+
   @Delete(':projectId')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiResponse({ status: 204, description: 'Project deleted successfully' })

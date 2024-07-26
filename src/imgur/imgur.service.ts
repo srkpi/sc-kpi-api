@@ -33,7 +33,7 @@ export class ImgurService {
       );
 
       const imageData = response.data;
-      const { url, deleteHash } = imageData.data;
+      const { link: url, deletehash: deleteHash } = imageData.data;
       return {
         url,
         deleteHash,
