@@ -14,6 +14,7 @@ import { Response, Request } from 'express';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { ConfigService } from '@nestjs/config';
 import ms from 'ms';
+import { Public } from 'src/auth/decorators';
 
 @ApiTags('schedule')
 @Controller('schedule')
@@ -26,12 +27,14 @@ export class ScheduleController {
   ) {}
 
   @Get('auth')
+  @Public()
   async googleAuth(@Res() res: Response) {
     const url = this.scheduleService.generateAuthUrl();
     return res.redirect(url);
   }
 
   @Get('callback')
+  @Public()
   async googleAuthCallback(
     @Query('code') code: string,
     @Query('error') error: string,
@@ -65,6 +68,7 @@ export class ScheduleController {
   }
 
   @Post('create')
+  @Public()
   @ApiResponse({
     status: 201,
     description: 'Calendar created and events added',
