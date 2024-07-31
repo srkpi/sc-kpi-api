@@ -15,6 +15,8 @@ import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { ConfigService } from '@nestjs/config';
 import ms from 'ms';
 import { Public } from 'src/auth/decorators';
+import { plainToInstance } from 'class-transformer';
+import { AuthUrlDto } from './dto/auth-url.dto';
 
 @ApiTags('schedule')
 @Controller('schedule')
@@ -28,9 +30,12 @@ export class ScheduleController {
 
   @Get('auth')
   @Public()
-  async googleAuth(@Res() res: Response) {
+  async googleAuth(): Promise<AuthUrlDto> {
     const url = this.scheduleService.generateAuthUrl();
-    return res.redirect(url);
+    const res = {
+      authUrl: url,
+    };
+    return plainToInstance(AuthUrlDto, res);
   }
 
   @Get('callback')
