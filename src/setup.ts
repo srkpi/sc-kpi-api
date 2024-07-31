@@ -36,7 +36,7 @@ export function setup(app: INestApplication) {
     ],
     credentials: true,
   });
-  app.useGlobalGuards(new ApiKeyGuard(configService));
+  app.useGlobalGuards(new ApiKeyGuard(configService, new Reflector()));
   const config = new DocumentBuilder()
     .setTitle('Api test')
     .setDescription('Api description')
