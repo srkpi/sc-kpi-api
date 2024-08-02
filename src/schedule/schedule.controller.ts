@@ -62,6 +62,7 @@ export class ScheduleController {
         httpOnly: true,
         sameSite: 'none',
         maxAge: ms('15m'),
+        secure: true,
       });
 
       return res.redirect(this.config.get<string>('FRONTEND_IMPORT_PAGE_URI'));
@@ -90,6 +91,7 @@ export class ScheduleController {
       httpOnly: true,
       sameSite: 'none',
       maxAge: ms('15m'),
+      secure: true,
     });
 
     if (!tokensString) {
