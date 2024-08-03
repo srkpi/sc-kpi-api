@@ -18,7 +18,9 @@ export class ScheduleUtil {
     const kyivDate = new Date(year, month - 1, day);
 
     let startYear = kyivDate.getFullYear();
-    if (kyivDate.getMonth() < 7 && kyivDate.getDate() < 31) {
+    if (kyivDate.getMonth() < 7 || kyivDate.getDate() < 31) {
+      startYear--;
+    } else if (kyivDate.getMonth() == 7 && kyivDate.getDate() < 31) {
       startYear--;
     }
 
