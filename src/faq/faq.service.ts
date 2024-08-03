@@ -40,9 +40,13 @@ export class FaqService {
 
   async update(updateFaqDto: UpdateFaqDto) {
     try {
+      const { id, categoryId, ...data } = updateFaqDto;
       return await this.prismaService.faq.update({
-        where: { id: updateFaqDto.id },
-        data: { ...updateFaqDto },
+        where: { id },
+        data: {
+          ...data,
+          category: categoryId ? { connect: { id: categoryId } } : undefined,
+        },
         include: { category: true },
       });
     } catch {
