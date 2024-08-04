@@ -179,10 +179,12 @@ export class ScheduleService {
           const time = pair.time.split('.').map((value) => parseInt(value));
           const [hours, minutes] = time;
           const pairStart = DateTime.fromJSDate(dayDate)
-            .setZone('Europe/Kyiv')
-            .plus({ hours: hours, minutes: minutes });
+            .plus({ hours: hours, minutes: minutes })
+            .setZone('Europe/Kyiv');
           const pairStartISO = pairStart.toISO();
-          const pairEnd = pairStart.plus({ minutes: PAIR_MINUTES });
+          const pairEnd = pairStart
+            .plus({ minutes: PAIR_MINUTES })
+            .setZone('Europe/Kyiv');
           const pairEndISO = pairEnd.toISO();
           await this.createPairEvent(
             oauth2Client,
