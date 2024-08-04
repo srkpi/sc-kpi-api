@@ -83,7 +83,7 @@ export class ScheduleUtil {
     return -(+h * 60 + (+h > 0 ? +m : -m));
   }
 
-  static formatDateToUTCString(date: Date, timeZone: string) {
+  static formatDateToUTCString(date: Date, timeZone: string, isISO: boolean) {
     const offset = this.getTimezoneOffset(timeZone);
 
     const utcDate = new Date(date.getTime() + offset * 60000);
@@ -94,6 +94,10 @@ export class ScheduleUtil {
     const hours = String(utcDate.getUTCHours()).padStart(2, '0');
     const minutes = String(utcDate.getUTCMinutes()).padStart(2, '0');
     const seconds = String(utcDate.getUTCSeconds()).padStart(2, '0');
+
+    if (isISO) {
+      return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.000Z`;
+    }
 
     return `${year}${month}${day}T${hours}${minutes}${seconds}Z`;
   }
