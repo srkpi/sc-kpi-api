@@ -132,19 +132,11 @@ export class ScheduleService {
         summary: pairEventInfo.summary,
         description: pairEventInfo.description,
         start: {
-          dateTime: ScheduleUtil.formatDateToUTCString(
-            pairStart,
-            'Europe/Kyiv',
-            true,
-          ), // Should be in ISO 8601 format
+          dateTime: ScheduleUtil.getISOString(pairStart), // Should be in ISO 8601 format
           timeZone: 'Europe/Kyiv',
         },
         end: {
-          dateTime: ScheduleUtil.formatDateToUTCString(
-            pairEnd,
-            'Europe/Kyiv',
-            true,
-          ), // Should be in ISO 8601 format
+          dateTime: ScheduleUtil.getISOString(pairEnd), // Should be in ISO 8601 format
           timeZone: 'Europe/Kyiv',
         },
         reminders: {
