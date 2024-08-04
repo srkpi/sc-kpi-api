@@ -4,7 +4,6 @@ import { Credentials, OAuth2Client } from 'google-auth-library';
 import { google } from 'googleapis';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { firstValueFrom } from 'rxjs';
-import { Weekdays } from './enums/weekdays.enum';
 import { SchedulePairDto } from './dto/schedule-pair.dto';
 import { HttpService } from '@nestjs/axios';
 import { ScheduleUtil } from './util/schedule.util';
@@ -127,11 +126,11 @@ export class ScheduleService {
         summary: pairEventInfo.summary,
         description: pairEventInfo.description,
         start: {
-          dateTime: pairStart.toISOString(), // Should be in ISO 8601 format
+          dateTime: ScheduleUtil.getISOString(pairStart), // Should be in ISO 8601 format
           timeZone: 'Europe/Kyiv',
         },
         end: {
-          dateTime: pairEnd.toISOString(), // Should be in ISO 8601 format
+          dateTime: ScheduleUtil.getISOString(pairEnd), // Should be in ISO 8601 format
           timeZone: 'Europe/Kyiv',
         },
         reminders: {

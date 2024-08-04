@@ -83,6 +83,10 @@ export class ScheduleUtil {
     return -(+h * 60 + (+h > 0 ? +m : -m));
   }
 
+  static getISOString(date: Date) {
+    return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}T${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}.000+02:00`;
+  }
+
   static formatDateToUTCString(date: Date, timeZone: string) {
     const offset = this.getTimezoneOffset(timeZone);
 
