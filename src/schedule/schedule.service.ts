@@ -178,10 +178,9 @@ export class ScheduleService {
         for (const pair of dayData.pairs) {
           const time = pair.time.split('.').map((value) => parseInt(value));
           const [hours, minutes] = time;
-          const pairStart = DateTime.fromJSDate(dayDate).plus({
-            hours: hours,
-            minutes: minutes,
-          });
+          const pairStart = DateTime.fromJSDate(dayDate)
+            .setZone('Europe/Kyiv')
+            .plus({ hours: hours, minutes: minutes });
           const pairStartISO = pairStart.toISO();
           console.log(
             hours,
