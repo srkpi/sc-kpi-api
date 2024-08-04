@@ -96,7 +96,7 @@ export class ScheduleUtil {
     const seconds = String(utcDate.getUTCSeconds()).padStart(2, '0');
 
     if (isISO) {
-      return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.000Z`;
+      return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.000+02:00`;
     }
 
     return `${year}${month}${day}T${hours}${minutes}${seconds}Z`;

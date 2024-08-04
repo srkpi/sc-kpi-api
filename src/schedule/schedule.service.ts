@@ -10,7 +10,6 @@ import { HttpService } from '@nestjs/axios';
 import { ScheduleUtil } from './util/schedule.util';
 import { Courses } from './enums/courses.enum';
 import ms from 'ms';
-import { DateTime } from 'luxon';
 
 @Injectable()
 export class ScheduleService {
@@ -111,44 +110,52 @@ export class ScheduleService {
     oauth2Client: OAuth2Client,
     calendarId: string,
     pairData: SchedulePairDto,
-    pairStartISO: string,
-    pairEndISO: string,
+    pairStart: Date,
+    pairEnd: Date,
     semesterEndDate: Date,
   ) {
-    try {
-      const pairEventInfo = await this.generatePairEventInfo(pairData);
-      const untilDateFormatted = ScheduleUtil.formatDateToUTCString(
-        semesterEndDate,
-        'Europe/Kyiv',
-        false,
-      );
-      const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+    const pairEventInfo = await this.generatePairEventInfo(pairData);
+    const untilDateFormatted = ScheduleUtil.formatDateToUTCString(
+      semesterEndDate,
+      'Europe/Kyiv',
+      false,
+    );
+    const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
-      return await calendar.events.insert({
-        calendarId: calendarId,
-        requestBody: {
-          summary: pairEventInfo.summary,
-          description: pairEventInfo.description,
-          start: {
-            dateTime: pairStartISO,
-            timeZone: 'Europe/Kyiv',
-          },
-          end: {
-            dateTime: pairEndISO,
-            timeZone: 'Europe/Kyiv',
-          },
-          reminders: {
-            useDefault: false,
-            overrides: [{ method: 'popup', minutes: 5 }],
-          },
-          recurrence: [
-            `RRULE:FREQ=WEEKLY;INTERVAL=2;UNTIL=${untilDateFormatted}`, // UNTIL should be in YYYYMMDDTHHMMSSZ format
-          ],
+    console.log(
+      ScheduleUtil.formatDateToUTCString(pairStart, 'Europe/Kyiv', true),
+    );
+
+    return await calendar.events.insert({
+      calendarId: calendarId,
+      requestBody: {
+        summary: pairEventInfo.summary,
+        description: pairEventInfo.description,
+        start: {
+          dateTime: ScheduleUtil.formatDateToUTCString(
+            pairStart,
+            'Europe/Kyiv',
+            true,
+          ), // Should be in ISO 8601 format
+          timeZone: 'Europe/Kyiv',
         },
-      });
-    } catch (e) {
-      console.log(e);
-    }
+        end: {
+          dateTime: ScheduleUtil.formatDateToUTCString(
+            pairEnd,
+            'Europe/Kyiv',
+            true,
+          ), // Should be in ISO 8601 format
+          timeZone: 'Europe/Kyiv',
+        },
+        reminders: {
+          useDefault: false,
+          overrides: [{ method: 'popup', minutes: 5 }],
+        },
+        recurrence: [
+          `RRULE:FREQ=WEEKLY;INTERVAL=2;UNTIL=${untilDateFormatted}`, // UNTIL should be in YYYYMMDDTHHMMSSZ format
+        ],
+      },
+    });
   }
 
   async createSemesterSchedule(
@@ -178,24 +185,16 @@ export class ScheduleService {
         for (const pair of dayData.pairs) {
           const time = pair.time.split('.').map((value) => parseInt(value));
           const [hours, minutes] = time;
-          const pairStart = DateTime.fromJSDate(dayDate)
-            .setZone('Europe/Kyiv')
-            .plus({ hours: hours, minutes: minutes });
-          const pairStartISO = pairStart.toISO();
-          console.log(
-            hours,
-            minutes,
-            new Date(dayDate).setHours(hours, minutes),
-            pairStartISO,
-          );
-          const pairEnd = pairStart.plus({ minutes: PAIR_MINUTES });
-          const pairEndISO = pairEnd.toISO();
+          const pairStart = new Date(dayDate);
+          pairStart.setHours(hours, minutes);
+          const pairEnd = new Date(pairStart);
+          pairEnd.setTime(pairStart.getTime() + PAIR_MINUTES * 60 * 1000);
           await this.createPairEvent(
             oauth2Client,
             calendarData.id,
             pair,
-            pairStartISO,
-            pairEndISO,
+            pairStart,
+            pairEnd,
             semesterEnd,
           );
         }
