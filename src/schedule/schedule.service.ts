@@ -4,7 +4,6 @@ import { Credentials, OAuth2Client } from 'google-auth-library';
 import { google } from 'googleapis';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { firstValueFrom } from 'rxjs';
-import { Weekdays } from './enums/weekdays.enum';
 import { SchedulePairDto } from './dto/schedule-pair.dto';
 import { HttpService } from '@nestjs/axios';
 import { ScheduleUtil } from './util/schedule.util';
@@ -118,13 +117,8 @@ export class ScheduleService {
     const untilDateFormatted = ScheduleUtil.formatDateToUTCString(
       semesterEndDate,
       'Europe/Kyiv',
-      false,
     );
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
-
-    console.log(
-      ScheduleUtil.formatDateToUTCString(pairStart, 'Europe/Kyiv', true),
-    );
 
     return await calendar.events.insert({
       calendarId: calendarId,

@@ -87,7 +87,7 @@ export class ScheduleUtil {
     return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}T${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}.000+02:00`;
   }
 
-  static formatDateToUTCString(date: Date, timeZone: string, isISO: boolean) {
+  static formatDateToUTCString(date: Date, timeZone: string) {
     const offset = this.getTimezoneOffset(timeZone);
 
     const utcDate = new Date(date.getTime() + offset * 60000);
@@ -98,10 +98,6 @@ export class ScheduleUtil {
     const hours = String(utcDate.getUTCHours()).padStart(2, '0');
     const minutes = String(utcDate.getUTCMinutes()).padStart(2, '0');
     const seconds = String(utcDate.getUTCSeconds()).padStart(2, '0');
-
-    if (isISO) {
-      return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.000+02:00`;
-    }
 
     return `${year}${month}${day}T${hours}${minutes}${seconds}Z`;
   }
