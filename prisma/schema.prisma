@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id() @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  email        String  @unique
+  firstName    String
+  lastName     String
+  middleName   String?
+  faculty      String
+  group        String
+  passwordHash String
+  role         Role    @default(user)
+}
+
+enum Role {
+  user
+  admin
+}
+
+model Greeting {
+  id       Int    @id() @default(autoincrement())
+  greeting String
+  name     String
+}
+
+model Faq {
+  id         Int          @id() @default(autoincrement())
+  question   String
+  answer     String
+  category   FaqCategory? @relation(fields: [categoryId], references: [id])
+  categoryId Int?
+}
+
+model FaqCategory {
+  id   Int    @id() @default(autoincrement())
+  name String
+  Faq  Faq[]
+}
+
+model Club {
+  id          Int           @id() @default(autoincrement())
+  name        String
+  description String
+  projects    ClubProject[]
+}
+
+model ClubProject {
+  id              Int    @id() @default(autoincrement())
+  name            String
+  description     String
+  club            Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  clubId          Int
+  image           String
+  imageDeleteHash String @default("")
+}
+
+model Department {
+  id               Int                 @id() @default(autoincrement())
+  name             String
+  description      String
+  shortDescription String
+  image            String
+  imageDeleteHash  String              @default("")
+  buttonLink       String
+  projects         DepartmentProject[]
+}
+
+model DepartmentProject {
+  id              Int        @id() @default(autoincrement())
+  name            String
+  description     String
+  department      Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  departmentId    Int
+  image           String
+  imageDeleteHash String     @default("")
+}
