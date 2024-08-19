@@ -18,8 +18,6 @@ import { MailModule } from './mail/mail.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
 import { ImgurModule } from './imgur/imgur.module';
-import { DocumentsService } from './documents/documents.service';
-import { DocumentsController } from './documents/documents.controller';
 import { DocumentsModule } from './documents/documents.module';
 
 @Module({
@@ -45,7 +43,7 @@ import { DocumentsModule } from './documents/documents.module';
     ImgurModule,
     DocumentsModule,
   ],
-  controllers: [AppController, DocumentsController],
+  controllers: [AppController],
   providers: [
     AppService,
     {
@@ -56,7 +54,6 @@ import { DocumentsModule } from './documents/documents.module';
       provide: APP_GUARD,
       useClass: RolesGuard,
     },
-    DocumentsService,
   ],
 })
 export class AppModule {}
