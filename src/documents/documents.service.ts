@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ServiceNoteDto } from './dto/service-note.dto';
 import JSZip from 'jszip';
-import { readFileSync } from 'fs';
+import { readFile } from 'fs/promises';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -9,7 +9,9 @@ export class DocumentsService {
   constructor(private prismaService: PrismaService) {}
 
   async generateServiceNote(dto: ServiceNoteDto) {
-    const docxBuffer = readFileSync(`${__dirname}/templates/service-note.docx`);
+    const docxBuffer = await readFile(
+      `${__dirname}/templates/service-note.docx`,
+    );
     const zip = new JSZip();
     const zipContent = await zip.loadAsync(docxBuffer);
     let documentXml = await zipContent.file('word/document.xml').async('text');
