@@ -18,6 +18,9 @@ import { MailModule } from './mail/mail.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
 import { ImgurModule } from './imgur/imgur.module';
+import { DocumentsService } from './documents/documents.service';
+import { DocumentsController } from './documents/documents.controller';
+import { DocumentsModule } from './documents/documents.module';
 
 @Module({
   imports: [
@@ -40,8 +43,9 @@ import { ImgurModule } from './imgur/imgur.module';
       storage: new ThrottlerStorageRedisService(process.env.REDIS_URL),
     }),
     ImgurModule,
+    DocumentsModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, DocumentsController],
   providers: [
     AppService,
     {
@@ -52,6 +56,7 @@ import { ImgurModule } from './imgur/imgur.module';
       provide: APP_GUARD,
       useClass: RolesGuard,
     },
+    DocumentsService,
   ],
 })
 export class AppModule {}

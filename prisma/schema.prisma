@@ -84,3 +84,11 @@ model DepartmentProject {
   image           String
   imageDeleteHash String     @default("")
 }
+
+model ServiceNote {
+  id        Int      @id() @default(autoincrement())
+  receiver  String
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+}
