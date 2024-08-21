@@ -22,12 +22,12 @@ export class DocumentsController {
   })
   @ApiResponse({ status: 400, description: 'Bad request' })
   async generateServiceNote(@Body() dto: ServiceNoteDto, @Res() res: Response) {
-    const file = await this.documentsService.generateServiceNote(dto);
+    const result = await this.documentsService.generateServiceNote(dto);
     res.set({
       'Content-Type':
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // DOCX MIME type
-      'Content-Disposition': 'attachment; filename=Service-note.docx',
+      'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(result.name)}`,
     });
-    res.send(file);
+    res.send(result.content);
   }
 }
