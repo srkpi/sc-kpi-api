@@ -11,6 +11,15 @@ export class ReadClubDto {
   description: string;
 
   @Expose()
+  shortDescription: string;
+
+  @Expose()
+  image: string;
+
+  @Expose()
+  buttonLink: string;
+
+  @Expose()
   @Type(() => ReadProjectDto)
   projects: ReadProjectDto[];
 }

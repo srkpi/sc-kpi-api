@@ -2,28 +2,39 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateClubDto } from './dto/create-club.dto';
 import { UpdateClubDto } from './dto/update-club.dto';
+import { ImgurService } from 'src/imgur/imgur.service';
 
 @Injectable()
 export class ClubsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private readonly imgurService: ImgurService,
+  ) {}
 
-  async create(createClubDto: CreateClubDto) {
-    return this.prisma.club.create({
+  async create(createClubDto: CreateClubDto, image: string) {
+    const { name, shortDescription } = createClubDto;
+    const imageData = await this.imgurService.uploadImage(
+      image,
+      name,
+      shortDescription,
+    );
+    return this.prismaService.club.create({
       data: {
-        name: createClubDto.name,
-        description: createClubDto.description,
+        ...createClubDto,
+        image: imageData.url,
+        imageDeleteHash: imageData.deleteHash,
       },
     });
   }
 
   async findAll() {
-    return this.prisma.club.findMany({
+    return this.prismaService.club.findMany({
       include: { projects: true },
     });
   }
 
   async findOne(id: number) {
-    const club = await this.prisma.club.findUnique({
+    const club = await this.prismaService.club.findUnique({
       where: { id },
       include: { projects: true },
     });
@@ -35,22 +46,45 @@ export class ClubsService {
 
   async update(updateClubDto: UpdateClubDto) {
     try {
-      return await this.prisma.club.update({
-        where: { id: updateClubDto.id },
-        data: {
-          name: updateClubDto.name,
-          description: updateClubDto.description,
-        },
-        include: { projects: true },
+      const { id, ...data } = updateClubDto;
+      return await this.prismaService.club.update({
+        where: { id },
+        data,
       });
     } catch {
       throw new NotFoundException('Club with this ID does not exist');
     }
   }
 
+  async updateImage(newImage: string, id: number) {
+    const club = await this.prismaService.club.findUnique({
+      where: { id },
+    });
+    if (!club) {
+      throw new NotFoundException('Club with this ID does not exist');
+    }
+    await this.imgurService.deleteImage(club.imageDeleteHash);
+    const imageData = await this.imgurService.uploadImage(
+      newImage,
+      club.name,
+      club.shortDescription,
+    );
+    const data = {
+      image: imageData.url,
+      imageDeleteHash: imageData.deleteHash,
+    };
+    return this.prismaService.club.update({
+      where: { id },
+      data,
+    });
+  }
+
   async remove(id: number) {
     try {
-      await this.prisma.club.delete({ where: { id } });
+      const removedClub = await this.prismaService.club.delete({
+        where: { id },
+      });
+      await this.imgurService.deleteImage(removedClub.imageDeleteHash);
     } catch {
       throw new NotFoundException('Club with this ID does not exist');
     }

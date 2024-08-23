@@ -48,10 +48,14 @@ model FaqCategory {
 }
 
 model Club {
-  id          Int           @id() @default(autoincrement())
-  name        String
-  description String
-  projects    ClubProject[]
+  id               Int           @id() @default(autoincrement())
+  name             String
+  description      String
+  shortDescription String        @default("")
+  image            String        @default("")
+  imageDeleteHash  String        @default("")
+  buttonLink       String        @default("")
+  projects         ClubProject[]
 }
 
 model ClubProject {
