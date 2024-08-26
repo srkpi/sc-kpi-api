@@ -9,6 +9,7 @@ import { HttpService } from '@nestjs/axios';
 import { ScheduleUtil } from './util/schedule.util';
 import { Courses } from './enums/courses.enum';
 import ms from 'ms';
+import { EventColor } from './enums/event-colors.enum';
 
 @Injectable()
 export class ScheduleService {
@@ -99,9 +100,13 @@ export class ScheduleService {
 
     const summary = `${pairData.name} [${pairData.place} ${pairData.type}] (${shortenedPosition} ${shortenedFullName})`;
     const description = `${pairData.place} ${pairData.type} з ${pairData.name}, викладач: ${position.toLowerCase()}${subdivision ? subdivision : ' '}${pairData.teacherName}`;
+
+    const colorId: string = EventColor[pairData.tag];
+
     return {
       summary,
       description,
+      colorId,
     };
   }
 
@@ -123,6 +128,7 @@ export class ScheduleService {
     return await calendar.events.insert({
       calendarId: calendarId,
       requestBody: {
+        colorId: pairEventInfo.colorId,
         summary: pairEventInfo.summary,
         description: pairEventInfo.description,
         start: {

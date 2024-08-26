@@ -5,7 +5,7 @@
   "compilerOptions": {
     "deleteOutDir": true,
     "plugins": ["@nestjs/swagger"],
-    "assets": ["**/*.html"],
+    "assets": ["**/*.docx", "**/*.html"],
     "watchAssets": true
   }
 }

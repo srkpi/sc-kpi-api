@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, IsUrl } from 'class-validator';
 
 export class CreateClubDto {
   @IsString()
@@ -8,4 +8,12 @@ export class CreateClubDto {
   @IsString()
   @IsNotEmpty()
   description: string;
+
+  @IsNotEmpty()
+  @IsString()
+  shortDescription: string;
+
+  @IsNotEmpty()
+  @IsUrl()
+  buttonLink: string;
 }

@@ -27,12 +27,6 @@ enum Role {
   admin
 }
 
-model Greeting {
-  id       Int    @id() @default(autoincrement())
-  greeting String
-  name     String
-}
-
 model Faq {
   id         Int          @id() @default(autoincrement())
   question   String
@@ -48,10 +42,14 @@ model FaqCategory {
 }
 
 model Club {
-  id          Int           @id() @default(autoincrement())
-  name        String
-  description String
-  projects    ClubProject[]
+  id               Int           @id() @default(autoincrement())
+  name             String
+  description      String
+  shortDescription String        @default("")
+  image            String        @default("")
+  imageDeleteHash  String        @default("")
+  buttonLink       String        @default("")
+  projects         ClubProject[]
 }
 
 model ClubProject {
@@ -83,4 +81,12 @@ model DepartmentProject {
   departmentId    Int
   image           String
   imageDeleteHash String     @default("")
+}
+
+model ServiceNote {
+  id        Int      @id() @default(autoincrement())
+  receiver  String
+  title     String
+  content   String
+  createdAt DateTime @default(now())
 }

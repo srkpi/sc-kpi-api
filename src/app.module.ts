@@ -6,7 +6,6 @@ import { AuthModule } from './auth/auth.module';
 import { ClubsModule } from './clubs/clubs.module';
 import { DepartmentsModule } from './departments/departments.module';
 import { FaqModule } from './faq/faq.module';
-import { GreetingsModule } from './greetings/greetings.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ScheduleModule } from './schedule/schedule.module';
 import { RedisOptions } from './redis/redis-options';
@@ -18,10 +17,10 @@ import { MailModule } from './mail/mail.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
 import { ImgurModule } from './imgur/imgur.module';
+import { DocumentsModule } from './documents/documents.module';
 
 @Module({
   imports: [
-    GreetingsModule,
     ConfigModule.forRoot({ isGlobal: true }),
     CacheModule.registerAsync(RedisOptions),
     PrismaModule,
@@ -40,6 +39,7 @@ import { ImgurModule } from './imgur/imgur.module';
       storage: new ThrottlerStorageRedisService(process.env.REDIS_URL),
     }),
     ImgurModule,
+    DocumentsModule,
   ],
   controllers: [AppController],
   providers: [

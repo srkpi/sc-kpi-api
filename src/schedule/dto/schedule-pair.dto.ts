@@ -20,4 +20,8 @@ export class SchedulePairDto {
   @IsString()
   @IsNotEmpty()
   place: string;
+
+  @IsString()
+  @IsNotEmpty()
+  tag: string;
 }
