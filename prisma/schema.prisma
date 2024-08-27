@@ -85,6 +85,7 @@ model DepartmentProject {
 
 model ServiceNote {
   id        Int      @id() @default(autoincrement())
+  type      String
   receiver  String
   title     String
   content   String
