@@ -7,7 +7,7 @@ import { NoteTypes } from '../types/note-types.type';
 
 @ValidatorConstraint({ name: 'isNoteType', async: false })
 export class IsNoteTypeValidator implements ValidatorConstraintInterface {
-  validate(value: any, args: ValidationArguments) {
+  validate(value: string, args: ValidationArguments) {
     return NoteTypes.includes(value);
   }
 
