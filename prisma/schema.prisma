@@ -91,3 +91,13 @@ model ServiceNote {
   content   String
   createdAt DateTime @default(now())
 }
+
+model CalendarEvent {
+  id               Int      @id() @default(autoincrement())
+  title            String
+  shortDescription String
+  location         String
+  tag              String
+  startDate        DateTime
+  endDate          DateTime
+}
