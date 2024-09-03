@@ -20,7 +20,7 @@ export class CalendarService {
       where: { id },
     });
     if (!event) {
-      throw new NotFoundException('Club with this ID does not exist');
+      throw new NotFoundException('Event with this ID does not exist');
     }
     return event;
   }
@@ -54,12 +54,16 @@ export class CalendarService {
     }
 
     const { id, ...data } = dto;
-    return this.prismaService.calendarEvent.update({
-      where: {
-        id,
-      },
-      data,
-    });
+    try {
+      return this.prismaService.calendarEvent.update({
+        where: {
+          id,
+        },
+        data,
+      });
+    } catch {
+      throw new NotFoundException('Event with this ID does not exist');
+    }
   }
 
   async deleteEvent(id: number) {
