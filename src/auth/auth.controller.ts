@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -83,14 +84,25 @@ export class AuthController {
 
   @UseGuards(RtGuard)
   @Put('password')
-  @HttpCode(HttpStatus.OK)
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: 'Password successfully updated',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Old password is invalid',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'New password should be different from old',
+  })
   async updatePassword(
     @Body() dto: UpdatePasswordDto,
     @User('sub') userId: number,
     @Res() res: Response,
   ) {
-    const response = await this.authService.updatePassword(dto, userId, res);
-    res.send(response);
+    await this.authService.updatePassword(dto, userId, res);
+    res.status(HttpStatus.NO_CONTENT).send();
   }
 
   @Public()
@@ -126,5 +138,14 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async resetPassword(@Body() dto: ResetPasswordDto) {
     await this.authService.resetPassword(dto);
+  }
+
+  @UseGuards(RtGuard)
+  @Delete('user')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deleteUser(@User() user: JwtRtPayload, @Res() res: Response) {
+    this.authService.clearAuthCookies(res);
+    await this.authService.deleteUser(user.sub);
+    res.status(HttpStatus.NO_CONTENT).send();
   }
 }

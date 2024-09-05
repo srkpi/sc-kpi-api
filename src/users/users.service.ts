@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -42,5 +43,9 @@ export class UsersService {
 
   remove(id: number) {
     return this.prismaService.user.delete({ where: { id } });
+  }
+
+  async updateUserInfo(id: number, dto: UpdateUserDto) {
+    return this.prismaService.user.update({ where: { id }, data: { ...dto } });
   }
 }

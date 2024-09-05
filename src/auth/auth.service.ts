@@ -192,4 +192,13 @@ export class AuthService {
   private hashData(data: string) {
     return bcrypt.hash(data, 10);
   }
+
+  async deleteUser(userId: number) {
+    await this.usersService.remove(userId);
+
+    const cacheKeys = await this.cacheManager.store.keys(`rt:${userId}:*`);
+    for (const key of cacheKeys) {
+      await this.cacheManager.del(key);
+    }
+  }
 }
