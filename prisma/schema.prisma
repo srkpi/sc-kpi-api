@@ -85,8 +85,19 @@ model DepartmentProject {
 
 model ServiceNote {
   id        Int      @id() @default(autoincrement())
+  type      String   @default("СЛУЖБОВА ЗАПИСКА")
   receiver  String
   title     String
   content   String
   createdAt DateTime @default(now())
+}
+
+model CalendarEvent {
+  id               Int      @id() @default(autoincrement())
+  title            String
+  shortDescription String
+  location         String
+  tag              String
+  startDate        DateTime
+  endDate          DateTime
 }

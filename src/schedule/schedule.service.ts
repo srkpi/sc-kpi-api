@@ -175,7 +175,7 @@ export class ScheduleService {
         const dayDate = new Date(startWeekDate);
         dayDate.setDate(dayDate.getDate() + dayIndex);
         for (const pair of dayData.pairs) {
-          const time = pair.time.split('.').map((value) => parseInt(value));
+          const time = pair.time.split(':').map((value) => parseInt(value));
           const [hours, minutes] = time;
           const pairStart = new Date(dayDate);
           pairStart.setHours(hours, minutes);
