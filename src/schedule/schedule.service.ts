@@ -67,39 +67,45 @@ export class ScheduleService {
   }
 
   private async generatePairEventInfo(pairData: SchedulePairDto) {
-    const encodedName = encodeURIComponent(pairData.teacherName);
-    const urlFindId = `https://api.campus.kpi.ua/intellect/v2/find?value=${encodedName}&pageNumber=1&pageSize=1`;
-    const responseFindIdData = (
-      await firstValueFrom(this.httpService.get(urlFindId))
-    ).data;
-
-    let position = '';
-    let subdivision = '';
-    if (responseFindIdData.data.length !== 0) {
-      const teacherData = responseFindIdData.data[0];
-      const intellectId = teacherData.userIdentifier;
-
-      const urlActualData = `https://api.campus.kpi.ua/account/public/${intellectId}`;
-      const responseActualData = (
-        await firstValueFrom(this.httpService.get(urlActualData))
+    let summary: string;
+    let description: string;
+    if (pairData.teacherName) {
+      const encodedName = encodeURIComponent(pairData.teacherName);
+      const urlFindId = `https://api.campus.kpi.ua/intellect/v2/find?value=${encodedName}&pageNumber=1&pageSize=1`;
+      const responseFindIdData = (
+        await firstValueFrom(this.httpService.get(urlFindId))
       ).data;
-      const positionData = responseActualData.positions[0];
 
-      if (positionData) {
-        position = positionData.name;
-        subdivision = ' ' + positionData.subdivision.name + ' ';
+      let position = '';
+      let subdivision = '';
+      if (responseFindIdData.data.length !== 0) {
+        const teacherData = responseFindIdData.data[0];
+        const intellectId = teacherData.userIdentifier;
+
+        const urlActualData = `https://api.campus.kpi.ua/account/public/${intellectId}`;
+        const responseActualData = (
+          await firstValueFrom(this.httpService.get(urlActualData))
+        ).data;
+        const positionData = responseActualData.positions[0];
+
+        if (positionData) {
+          position = positionData.name;
+          subdivision = ' ' + positionData.subdivision.name + ' ';
+        }
+      } else {
+        position = 'пос.';
       }
+
+      const shortenedPosition = ScheduleUtil.shortenPosition(position);
+      const shortenedFullName = ScheduleUtil.shortenFullName(
+        pairData.teacherName,
+      );
+      summary = `${pairData.name} [${pairData.place} ${pairData.type}] (${shortenedPosition} ${shortenedFullName})`;
+      description = `${pairData.place} ${pairData.type} з ${pairData.name}. Викладач: ${position.toLowerCase()}${subdivision ? subdivision : ' '}${pairData.teacherName}`;
     } else {
-      position = 'пос.';
+      summary = `${pairData.name} [${pairData.place} ${pairData.type}]`;
+      description = `${pairData.place} ${pairData.type} з ${pairData.name}. Викладач відсутній у розкладі`;
     }
-
-    const shortenedPosition = ScheduleUtil.shortenPosition(position);
-    const shortenedFullName = ScheduleUtil.shortenFullName(
-      pairData.teacherName,
-    );
-
-    const summary = `${pairData.name} [${pairData.place} ${pairData.type}] (${shortenedPosition} ${shortenedFullName})`;
-    const description = `${pairData.place} ${pairData.type} з ${pairData.name}, викладач: ${position.toLowerCase()}${subdivision ? subdivision : ' '}${pairData.teacherName}`;
 
     const colorId: string = EventColor[pairData.tag];
 

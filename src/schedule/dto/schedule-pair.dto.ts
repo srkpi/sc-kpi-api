@@ -1,7 +1,8 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { IsTimeString } from '../decorators/is-time-string.decorator';
 
 export class SchedulePairDto {
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
   teacherName: string;
