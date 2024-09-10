@@ -101,24 +101,4 @@ export class ScheduleUtil {
 
     return `${year}${month}${day}T${hours}${minutes}${seconds}Z`;
   }
-
-  static shortenPosition(position: string) {
-    const SHORT_POSITIONS = {
-      асистент: 'асис.',
-      викладач: 'вик.',
-      'старший викладач': 'ст.вик.',
-      доцент: 'доц.',
-      професор: 'проф.',
-      посади: 'пос.',
-    };
-
-    return SHORT_POSITIONS[position.toLowerCase()] || position.toLowerCase();
-  }
-
-  static shortenFullName(fullName: string) {
-    return fullName
-      .split(' ')
-      .map((value, index) => (index > 0 ? `${value[0].toUpperCase()}.` : value))
-      .join(' ');
-  }
 }
