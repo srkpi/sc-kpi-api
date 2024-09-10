@@ -67,7 +67,8 @@ export class ScheduleService {
   }
 
   private async generatePairEventInfo(pairData: SchedulePairDto) {
-    let summary: string;
+    const summary = `${pairData.name} [${pairData.place} ${pairData.type}]`;
+
     let description: string;
     if (pairData.teacherName) {
       const encodedName = encodeURIComponent(pairData.teacherName);
@@ -96,15 +97,9 @@ export class ScheduleService {
         position = 'пос.';
       }
 
-      const shortenedPosition = ScheduleUtil.shortenPosition(position);
-      const shortenedFullName = ScheduleUtil.shortenFullName(
-        pairData.teacherName,
-      );
-      summary = `${pairData.name} [${pairData.place} ${pairData.type}] (${shortenedPosition} ${shortenedFullName})`;
-      description = `${pairData.place} ${pairData.type} з ${pairData.name}. Викладач: ${position.toLowerCase()}${subdivision ? subdivision : ' '}${pairData.teacherName}`;
+      description = `Викладач: ${position.toLowerCase()}${subdivision ? subdivision : ' '}${pairData.teacherName}`;
     } else {
-      summary = `${pairData.name} [${pairData.place} ${pairData.type}]`;
-      description = `${pairData.place} ${pairData.type} з ${pairData.name}. Викладач відсутній у розкладі`;
+      description = `Викладач відсутній у розкладі`;
     }
 
     const colorId: string = EventColor[pairData.tag];
