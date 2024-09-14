@@ -49,6 +49,7 @@ model Club {
   image            String        @default("")
   imageDeleteHash  String        @default("")
   buttonLink       String        @default("")
+  category         String        @default("")
   projects         ClubProject[]
 }
 
