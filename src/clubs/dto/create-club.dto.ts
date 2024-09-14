@@ -16,4 +16,8 @@ export class CreateClubDto {
   @IsNotEmpty()
   @IsUrl()
   buttonLink: string;
+
+  @IsNotEmpty()
+  @IsString()
+  category: string;
 }
