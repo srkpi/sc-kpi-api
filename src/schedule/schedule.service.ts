@@ -67,7 +67,7 @@ export class ScheduleService {
   }
 
   private async generatePairEventInfo(pairData: SchedulePairDto) {
-    const summary = `${pairData.name} [${pairData.place} ${pairData.type}]`;
+    const summary = `${pairData.name} [${pairData.place ? `${pairData.place} ` : ''}${pairData.type}]`;
 
     let description: string;
     if (pairData.teacherName) {
