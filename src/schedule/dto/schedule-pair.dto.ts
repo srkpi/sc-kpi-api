@@ -26,4 +26,9 @@ export class SchedulePairDto {
   @IsString()
   @IsNotEmpty()
   tag: string;
+
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  conferenceLink?: string;
 }
