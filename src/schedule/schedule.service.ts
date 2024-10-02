@@ -67,7 +67,7 @@ export class ScheduleService {
   }
 
   private async generatePairEventInfo(pairData: SchedulePairDto) {
-    const summary = `${pairData.name} [${pairData.place} ${pairData.type}]`;
+    const summary = `${pairData.name} [${pairData.place ? `${pairData.place} ` : ''}${pairData.type}]`;
 
     let description: string;
     if (pairData.teacherName) {
@@ -132,6 +132,7 @@ export class ScheduleService {
         colorId: pairEventInfo.colorId,
         summary: pairEventInfo.summary,
         description: pairEventInfo.description,
+        ...(pairData.conferenceLink && { location: pairData.conferenceLink }),
         start: {
           dateTime: ScheduleUtil.getISOString(pairStart), // Should be in ISO 8601 format
           timeZone: 'Europe/Kyiv',

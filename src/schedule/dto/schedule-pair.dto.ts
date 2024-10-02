@@ -18,11 +18,17 @@ export class SchedulePairDto {
   @IsNotEmpty()
   name: string;
 
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
-  place: string;
+  place?: string;
 
   @IsString()
   @IsNotEmpty()
   tag: string;
+
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  conferenceLink?: string;
 }
