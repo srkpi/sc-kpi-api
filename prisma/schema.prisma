@@ -84,6 +84,15 @@ model DepartmentProject {
   imageDeleteHash String     @default("")
 }
 
+model Service {
+  id              Int    @id() @default(autoincrement())
+  name            String
+  description     String
+  image           String
+  imageDeleteHash String
+  buttonLink      String
+}
+
 model ServiceNote {
   id        Int      @id() @default(autoincrement())
   type      String   @default("СЛУЖБОВА ЗАПИСКА")
