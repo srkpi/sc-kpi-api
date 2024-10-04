@@ -1,15 +1,67 @@
-import { Injectable } from '@nestjs/common';
-import { ServiceNoteDto } from './dto/service-note.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { CreateNoteDto } from './dto/create-note.dto';
 import { readFile } from 'fs/promises';
 import { PrismaService } from 'src/prisma/prisma.service';
 import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater';
+import { Note } from './types/note.type';
+import { UpdateNoteDto } from './dto/update-note.dto';
 
 @Injectable()
 export class DocumentsService {
   constructor(private prismaService: PrismaService) {}
 
-  async generateServiceNote(dto: ServiceNoteDto) {
+  async createNote(dto: CreateNoteDto) {
+    const createdNote = await this.prismaService.serviceNote.create({
+      data: dto,
+    });
+
+    return this.generateNoteDocument(createdNote);
+  }
+
+  async findNote(id: number) {
+    const note = await this.prismaService.serviceNote.findUnique({
+      where: { id },
+    });
+
+    if (!note) {
+      throw new NotFoundException(`Note with id ${id} does not exist`);
+    }
+
+    return this.generateNoteDocument(note);
+  }
+
+  async findAllNotes() {
+    const notes = await this.prismaService.serviceNote.findMany();
+    return notes.map((note) => ({
+      id: note.id,
+      name: this.formatName(note),
+    }));
+  }
+
+  async updateNote(dto: UpdateNoteDto) {
+    const { id, ...data } = dto;
+    try {
+      const updatedNote = await this.prismaService.serviceNote.update({
+        where: { id },
+        data,
+      });
+
+      return this.generateNoteDocument(updatedNote);
+    } catch {
+      throw new NotFoundException(`Note with id ${id} not found`);
+    }
+  }
+
+  async deleteNote(id: number) {
+    try {
+      await this.prismaService.serviceNote.delete({ where: { id } });
+    } catch {
+      throw new NotFoundException(`Note with id ${id} not found`);
+    }
+  }
+
+  private async generateNoteDocument(note: Note) {
     const docxBuffer = await readFile(
       `${__dirname}/templates/service-note.docx`,
     );
@@ -20,16 +72,11 @@ export class DocumentsService {
       linebreaks: true,
     });
 
-    const result = await this.prismaService.serviceNote.create({ data: dto });
-
     doc.render({
-      number: result.id,
-      day: result.createdAt.getDate(),
-      month: this.uaMonth(result.createdAt.getMonth()),
-      year: result.createdAt.getFullYear(),
-      receiver: dto.receiver,
-      title: dto.title,
-      content: dto.content,
+      type: note.type,
+      receiver: note.receiver,
+      title: note.title,
+      content: note.content,
     });
 
     const content = doc.getZip().generate({
@@ -37,29 +84,20 @@ export class DocumentsService {
       compression: 'DEFLATE',
     });
 
-    const year = result.createdAt.getFullYear();
-    const shortTitle = dto.title.split(/\s+/).slice(0, 5).join('_');
-
-    const name = `Службова_№${result.id}_${year}_${shortTitle}.docx`;
+    const name = this.formatName(note);
 
     return { name, content };
   }
 
-  private uaMonth(month: number) {
-    const months = [
-      'січня',
-      'лютого',
-      'березня',
-      'квітня',
-      'травня',
-      'червня',
-      'липня',
-      'серпня',
-      'вересня',
-      'жовтня',
-      'листопада',
-      'грудня',
-    ];
-    return months[month];
+  private formatName(note: Note) {
+    // name: Notetype_№number_year_Text_from_title_five_words.docx
+    const year = note.createdAt.getFullYear();
+    const shortTitle = note.title.split(/\s+/).slice(0, 5).join('_');
+    const type = this.capitalize(note.type).split(/\s+/)[0];
+    return `${type}_№${note.id}_${year}_${shortTitle}.docx`;
+  }
+
+  private capitalize(str: string): string {
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
   }
 }
