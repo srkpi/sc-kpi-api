@@ -18,7 +18,6 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
 import { ImgurModule } from './imgur/imgur.module';
 import { DocumentsModule } from './documents/documents.module';
-import { CalendarModule } from './calendar/calendar.module';
 
 @Module({
   imports: [
@@ -41,7 +40,6 @@ import { CalendarModule } from './calendar/calendar.module';
     }),
     ImgurModule,
     DocumentsModule,
-    CalendarModule,
   ],
   controllers: [AppController],
   providers: [

@@ -20,6 +20,9 @@ export class ReadClubDto {
   buttonLink: string;
 
   @Expose()
+  category: string;
+
+  @Expose()
   @Type(() => ReadProjectDto)
   projects: ReadProjectDto[];
 }

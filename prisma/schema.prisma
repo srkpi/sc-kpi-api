@@ -49,6 +49,7 @@ model Club {
   image            String        @default("")
   imageDeleteHash  String        @default("")
   buttonLink       String        @default("")
+  category         String        @default("")
   projects         ClubProject[]
 }
 
@@ -81,6 +82,15 @@ model DepartmentProject {
   departmentId    Int
   image           String
   imageDeleteHash String     @default("")
+}
+
+model Service {
+  id              Int    @id() @default(autoincrement())
+  name            String
+  description     String
+  image           String
+  imageDeleteHash String
+  buttonLink      String
 }
 
 model ServiceNote {

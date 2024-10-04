@@ -27,7 +27,6 @@ export class DocumentsService {
       day: result.createdAt.getDate(),
       month: this.uaMonth(result.createdAt.getMonth()),
       year: result.createdAt.getFullYear(),
-      type: dto.type,
       receiver: dto.receiver,
       title: dto.title,
       content: dto.content,

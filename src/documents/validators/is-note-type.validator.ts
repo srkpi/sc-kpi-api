@@ -12,6 +12,5 @@ export class IsNoteTypeValidator implements ValidatorConstraintInterface {
   }
 
   defaultMessage(): string {
-    return 'The value must be a valid note type: СЛУЖБОВА ЗАПИСКА, ПОДАННЯ, ЗВЕРНЕННЯ';
   }
 }
