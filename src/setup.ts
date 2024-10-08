@@ -37,6 +37,8 @@ export function setup(app: INestApplication) {
     credentials: true,
   });
   app.useGlobalGuards(new ApiKeyGuard(configService, new Reflector()));
+
+  const swaggerBasePath = configService.get('SWAGGER_BASE_PATH') || '/';
   const config = new DocumentBuilder()
     .setTitle('Api test')
     .setDescription('Api description')
@@ -44,6 +46,7 @@ export function setup(app: INestApplication) {
     .addApiKey({ type: 'apiKey', name: 'x-api-key', in: 'header' }, 'x-api-key')
     .addSecurityRequirements('x-api-key')
     .addBearerAuth()
+    .addServer(swaggerBasePath)
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document, {
