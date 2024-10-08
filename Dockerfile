@@ -14,4 +14,4 @@ COPY --from=BUILDER-BACK /api-app/dist /api/dist
 COPY --from=BUILDER-BACK /api-app/package.json /api/package.json
 COPY --from=BUILDER-BACK /api-app/prisma /api/prisma
 
-CMD yarn start:prod
+CMD yarn start
