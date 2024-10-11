@@ -1,0 +1,2 @@
+email,firstName,lastName,middleName,faculty,group,passwordHash,role
+dev@test.com,John,Doe,,FICE,IP-15,<password_hash>,admin
