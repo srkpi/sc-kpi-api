@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
 import csvParser from 'csv-parser';
-import { User } from 'prisma/seed/types/user.type';
+import { User } from './types/user.type';
 
 const prisma = new PrismaClient();
 
