@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
 import csvParser from 'csv-parser';
+import { User } from 'src/auth/types/user.type';
 
 const prisma = new PrismaClient();
 
@@ -11,7 +12,7 @@ async function importCsvToUser(csvFilePath: string) {
     return;
   }
 
-  const userData = await new Promise<any[]>((resolve, reject) => {
+  const userData = await new Promise<User[]>((resolve, reject) => {
     const results = [];
     fs.createReadStream(csvFilePath)
       .pipe(csvParser())
@@ -32,22 +33,11 @@ async function importCsvToUser(csvFilePath: string) {
       continue;
     }
 
-    const processedUser = {
-      email: userItem.email,
-      firstName: userItem.firstName,
-      lastName: userItem.lastName,
-      middleName: userItem.middleName || null,
-      faculty: userItem.faculty,
-      group: userItem.group,
-      passwordHash: userItem.passwordHash,
-      role: userItem.role || 'admin',
-    };
-
     try {
       await prisma.user.create({
-        data: processedUser,
+        data: userItem,
       });
-      console.log(`Successfully imported user: ${processedUser.email}`);
+      console.log(`Successfully imported user: ${userItem.email}`);
     } catch (err) {
       console.error(`Error inserting user data:`, err);
     }
