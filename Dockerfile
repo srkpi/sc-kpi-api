@@ -13,6 +13,7 @@ COPY --from=BUILDER-BACK /api-app/node_modules /api/node_modules
 COPY --from=BUILDER-BACK /api-app/dist /api/dist
 COPY --from=BUILDER-BACK /api-app/package.json /api/package.json
 COPY --from=BUILDER-BACK /api-app/prisma /api/prisma
+COPY --from=BUILDER-BACK /api-app/data /api-app/data
 
 RUN mkdir -p /api/data && if [ -d "/api-app/data" ]; then cp -r /api-app/data/* /api/data/; else echo "No data files found in build context. Skipping."; fi
 
