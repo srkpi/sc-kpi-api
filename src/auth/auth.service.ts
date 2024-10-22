@@ -1,9 +1,7 @@
 import { InjectQueue } from '@nestjs/bull';
-import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import {
   BadRequestException,
   ForbiddenException,
-  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -17,14 +15,14 @@ import { MailService } from 'src/mail/mail.service';
 import { UsersService } from 'src/users/users.service';
 import { v4 as uuid } from 'uuid';
 import { LoginDto, ResetPasswordDto, UpdatePasswordDto } from './dto';
-import { RegisterDto } from './dto/register.dto';
+import { RegisterDto } from './dto';
 import { JwtPayload, Tokens } from './types';
+import { RedisService } from '../redis/redis.service';
 
 @Injectable()
 export class AuthService {
   private readonly cookieOptions: CookieOptions = {
     httpOnly: true,
-    maxAge: 7 * 24 * 60 * 60 * 1000,
     sameSite: 'none',
     secure: true,
   };
@@ -34,8 +32,8 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private mailService: MailService,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
     @InjectQueue('recovery-queue') private recoveryQueue: Queue,
+    private redisService: RedisService,
   ) {}
 
   async register(dto: RegisterDto): Promise<Tokens> {
@@ -65,7 +63,7 @@ export class AuthService {
   }
 
   async logout(userId: number, deviceId: string) {
-    await this.cacheManager.del(`rt:${userId}:${deviceId}`);
+    await this.redisService.deleteKey(`rt:${userId}:${deviceId}`);
   }
 
   async refreshToken(
@@ -76,11 +74,11 @@ export class AuthService {
   ) {
     const user = await this.usersService.findUserById(userId);
     if (!user) {
-      await this.cacheManager.del(`rt:${userId}:${deviceId}`);
+      await this.redisService.deleteKey(`rt:${userId}:${deviceId}`);
       this.clearAuthCookies(res);
       throw new ForbiddenException('User with this id does not exist');
     }
-    const hashedRt = await this.cacheManager.get<string>(
+    const hashedRt = await this.redisService.getValue(
       `rt:${userId}:${deviceId}`,
     );
     if (!hashedRt) {
@@ -95,8 +93,14 @@ export class AuthService {
   }
 
   setAuthCookies(res: Response, tokens: Tokens) {
-    res.cookie('refreshToken', tokens.refreshToken, this.cookieOptions);
-    res.cookie('deviceId', tokens.deviceId, this.cookieOptions);
+    res.cookie('refreshToken', tokens.refreshToken, {
+      ...this.cookieOptions,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    res.cookie('deviceId', tokens.deviceId, {
+      ...this.cookieOptions,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
   }
 
   clearAuthCookies(res: Response) {
@@ -130,7 +134,7 @@ export class AuthService {
     const job = await this.recoveryQueue.add({ email }, { removeOnFail: true });
     await job.finished();
     const token = uuid();
-    await this.cacheManager.set(token, email, ms('15m'));
+    await this.redisService.setKey(token, email, ms('15m'));
     await this.mailService.sendPasswordRecoveryEmail(email, token);
   }
 
@@ -142,27 +146,28 @@ export class AuthService {
 
   async resetPassword(dto: ResetPasswordDto) {
     const { token, newPassword } = dto;
-    const email = await this.cacheManager.get<string>(token);
+    const email = await this.redisService.getValue(token);
     if (!email) {
       throw new NotFoundException('Time is up. Please try again');
     }
     const user = await this.usersService.findUserByEmail(email);
     await this.changePassword(user.id, newPassword);
-    await this.cacheManager.del(token);
+    await this.redisService.deleteKey(token);
   }
 
   private async changePassword(userId: number, newPassword: string) {
-    const cacheKeys = await this.cacheManager.store.keys(`rt:${userId}:*`);
-    for (const key of cacheKeys) {
-      await this.cacheManager.del(key);
-    }
+    await this.redisService.deleteSubset(`rt:${userId}:*`);
     const hash = await this.hashData(newPassword);
     await this.usersService.updatePassword(userId, hash);
   }
 
   private async updateRtHash(userId: number, rt: string, deviceId: string) {
     const rtHash = await this.hashData(rt);
-    await this.cacheManager.set(`rt:${userId}:${deviceId}`, rtHash, ms('7d'));
+    await this.redisService.setKey(
+      `rt:${userId}:${deviceId}`,
+      rtHash,
+      ms('7d'),
+    );
   }
 
   private async getTokens(
@@ -195,10 +200,6 @@ export class AuthService {
 
   async deleteUser(userId: number) {
     await this.usersService.remove(userId);
-
-    const cacheKeys = await this.cacheManager.store.keys(`rt:${userId}:*`);
-    for (const key of cacheKeys) {
-      await this.cacheManager.del(key);
-    }
+    await this.redisService.deleteSubset(`rt:${userId}:*`);
   }
 }
