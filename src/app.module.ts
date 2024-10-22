@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
 import { ClubsModule } from './clubs/clubs.module';
@@ -20,7 +20,6 @@ import { ServicesModule } from './services/services.module';
 import { RedisModule } from './redis/redis.module';
 import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
 import Redis from 'ioredis';
-import { getRedisOptions } from './redis/redis-options';
 
 @Module({
   imports: [
