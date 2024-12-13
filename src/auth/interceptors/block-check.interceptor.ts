@@ -3,17 +3,15 @@ import {
   ExecutionContext,
   HttpException,
   HttpStatus,
-  Inject,
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
 import { Observable } from 'rxjs';
+import { RedisService } from '../../redis/redis.service';
 
 @Injectable()
 export class BlockCheckInterceptor implements NestInterceptor {
-  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
+  constructor(private redisService: RedisService) {}
 
   async intercept(
     context: ExecutionContext,
@@ -22,7 +20,7 @@ export class BlockCheckInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest();
     const { email } = request.body;
 
-    const isBlocked = await this.cacheManager.get<boolean>(
+    const isBlocked = await this.redisService.getValue(
       `blocked-recovery:${email}`,
     );
     if (isBlocked) {

@@ -4,7 +4,6 @@ import { IsTimeString } from '../decorators/is-time-string.decorator';
 export class SchedulePairDto {
   @IsOptional()
   @IsString()
-  @IsNotEmpty()
   teacherName: string;
 
   @IsString()
@@ -20,7 +19,6 @@ export class SchedulePairDto {
 
   @IsOptional()
   @IsString()
-  @IsNotEmpty()
   place?: string;
 
   @IsString()

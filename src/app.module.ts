@@ -1,4 +1,3 @@
-import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
@@ -8,23 +7,23 @@ import { DepartmentsModule } from './departments/departments.module';
 import { FaqModule } from './faq/faq.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ScheduleModule } from './schedule/schedule.module';
-import { RedisOptions } from './redis/redis-options';
 import { UsersModule } from './users/users.module';
 import { AppService } from './app.service';
 import { APP_GUARD } from '@nestjs/core';
 import { AtGuard, RolesGuard } from './auth/guards';
 import { MailModule } from './mail/mail.module';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
 import { ImgurModule } from './imgur/imgur.module';
 import { DocumentsModule } from './documents/documents.module';
 import { CalendarModule } from './calendar/calendar.module';
 import { ServicesModule } from './services/services.module';
+import { RedisModule } from './redis/redis.module';
+import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
+import Redis from 'ioredis';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    CacheModule.registerAsync(RedisOptions),
     PrismaModule,
     FaqModule,
     ClubsModule,
@@ -33,12 +32,16 @@ import { ServicesModule } from './services/services.module';
     AuthModule,
     UsersModule,
     MailModule,
-    ThrottlerModule.forRoot({
-      throttlers: [
-        { name: 'short', ttl: 60, limit: 10 },
-        { name: 'medium', ttl: 60, limit: 10 },
-      ],
-      storage: new ThrottlerStorageRedisService(process.env.REDIS_URL),
+    RedisModule.forRoot(),
+    ThrottlerModule.forRootAsync({
+      inject: ['REDIS_CLIENT'],
+      useFactory: (redisClient: Redis) => ({
+        throttlers: [
+          { name: 'short', ttl: 60, limit: 10 },
+          { name: 'medium', ttl: 60, limit: 10 },
+        ],
+        storage: new ThrottlerStorageRedisService(redisClient),
+      }),
     }),
     ImgurModule,
     DocumentsModule,

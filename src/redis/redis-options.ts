@@ -1,17 +1,17 @@
-import { CacheModuleAsyncOptions } from '@nestjs/cache-manager';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { redisStore } from 'cache-manager-redis-store';
+import { RedisOptions } from 'ioredis';
+import { ConfigService } from '@nestjs/config';
 
-export const RedisOptions: CacheModuleAsyncOptions = {
-  isGlobal: true,
-  imports: [ConfigModule],
-  useFactory: async (configService: ConfigService) => {
-    const store = await redisStore({
-      url: configService.get<string>('REDIS_URL'),
-    });
-    return {
-      store: () => store,
-    };
-  },
-  inject: [ConfigService],
+export const getRedisOptions = (configService: ConfigService): RedisOptions => {
+  return {
+    username: configService.get<string>('REDIS_USER') || undefined,
+    host: configService.get<string>('REDIS_HOST', 'localhost'),
+    port: configService.get<number>('REDIS_PORT', 6379),
+    password: configService.get<string>('REDIS_PASSWORD') || undefined,
+    keepAlive: 30000,
+    connectTimeout: 10000,
+    maxRetriesPerRequest: 5,
+    retryStrategy: (times) => {
+      return Math.min(times * 50, 2000);
+    },
+  };
 };
