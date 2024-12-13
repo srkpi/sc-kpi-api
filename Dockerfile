@@ -8,6 +8,8 @@ RUN yarn build
 
 FROM node:20-alpine AS production
 
+RUN apk add --no-cache openssl
+
 WORKDIR /api
 COPY --from=BUILDER-BACK /api-app/node_modules /api/node_modules
 COPY --from=BUILDER-BACK /api-app/dist /api/dist
