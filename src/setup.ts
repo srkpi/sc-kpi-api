@@ -38,7 +38,7 @@ export function setup(app: INestApplication) {
   });
   app.useGlobalGuards(new ApiKeyGuard(configService, new Reflector()));
 
-  const swaggerBasePath = configService.get('SWAGGER_BASE_PATH') || '/';
+  const swaggerBasePath = configService.get('SWAGGER_BASE_PATH') || '/swagger';
   const config = new DocumentBuilder()
     .setTitle('Api test')
     .setDescription('Api description')
